@@ -14,6 +14,7 @@ class BrowserApp {
     init() {
         this.setupEventListeners();
         this.loadBookmarks();
+        this.initTheme();
         this.createNewTab('https://www.baidu.com');
     }
 
@@ -528,10 +529,45 @@ class BrowserApp {
     }
 
     toggleTheme() {
-        // 这里可以实现主题切换功能
-        console.log('主题切换功能待实现');
-        // 简单的示例：切换暗色主题
-        document.body.classList.toggle('dark-theme');
+        const body = document.body;
+        const isDark = body.classList.contains('dark-theme');
+        
+        if (isDark) {
+            body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+            logger.info('切换到浅色主题');
+        } else {
+            body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+            logger.info('切换到暗黑主题');
+        }
+        
+        // 更新主题菜单显示
+        this.updateThemeMenuText();
+    }
+
+    initTheme() {
+        // 从localStorage加载保存的主题设置
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // 如果没有保存的主题设置，则使用系统偏好
+        const shouldUseDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
+        
+        if (shouldUseDark) {
+            document.body.classList.add('dark-theme');
+        }
+        
+        this.updateThemeMenuText();
+        logger.info('主题初始化完成:', shouldUseDark ? '暗黑主题' : '浅色主题');
+    }
+
+    updateThemeMenuText() {
+        const themeMenu = document.querySelector('#theme-menu span');
+        const isDark = document.body.classList.contains('dark-theme');
+        if (themeMenu) {
+            themeMenu.textContent = isDark ? '浅色主题' : '暗黑主题';
+        }
     }
 
     showAbout() {

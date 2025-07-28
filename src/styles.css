@@ -445,4 +445,178 @@ webview.active {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* 暗黑主题样式 */
+.dark-theme {
+    color-scheme: dark;
+}
+
+.dark-theme body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+/* 暗黑主题 - 工具栏 */
+.dark-theme .toolbar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-bottom: 1px solid #34495e;
+}
+
+.dark-theme .nav-btn, 
+.dark-theme .action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+.dark-theme .nav-btn:hover, 
+.dark-theme .action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.dark-theme #address-bar {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+.dark-theme #address-bar:focus {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme #address-bar::placeholder {
+    color: #aaa;
+}
+
+.dark-theme .go-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+.dark-theme .go-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* 暗黑主题 - 标签页 */
+.dark-theme .tabs-container {
+    background: #2c2c2c;
+    border-bottom: 1px solid #444;
+}
+
+.dark-theme .tab {
+    background: #3c3c3c;
+    color: #e0e0e0;
+    border-top: 3px solid transparent;
+}
+
+.dark-theme .tab:hover {
+    background: #4c4c4c;
+}
+
+.dark-theme .tab.active {
+    background: #1a1a1a;
+    border-top-color: #667eea;
+    color: #fff;
+}
+
+.dark-theme .tab-close {
+    color: #aaa;
+}
+
+.dark-theme .tab-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* 暗黑主题 - 设置菜单 */
+.dark-theme .settings-menu {
+    background: #2c2c2c;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .menu-item {
+    color: #e0e0e0;
+}
+
+.dark-theme .menu-item:hover {
+    background: #3c3c3c;
+}
+
+.dark-theme .submenu {
+    background: #2c2c2c;
+    border: 1px solid #444;
+}
+
+.dark-theme .submenu-item {
+    color: #e0e0e0;
+}
+
+.dark-theme .submenu-item:hover {
+    background: #3c3c3c;
+}
+
+/* 暗黑主题 - 收藏夹侧边栏 */
+.dark-theme .bookmarks-sidebar {
+    background: #2c2c2c;
+    border-left: 1px solid #444;
+}
+
+.dark-theme .sidebar-header {
+    background: #1e1e1e;
+    border-bottom: 1px solid #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .close-btn {
+    background: none;
+    color: #aaa;
+}
+
+.dark-theme .close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.dark-theme .bookmark-item {
+    color: #e0e0e0;
+    border-bottom: 1px solid #3c3c3c;
+}
+
+.dark-theme .bookmark-item:hover {
+    background: #3c3c3c;
+}
+
+.dark-theme .bookmark-url {
+    color: #aaa;
+}
+
+.dark-theme .bookmark-remove {
+    background: #dc3545;
+    color: white;
+}
+
+.dark-theme .bookmark-remove:hover {
+    background: #c82333;
+}
+
+/* 暗黑主题 - 滚动条 */
+.dark-theme ::-webkit-scrollbar-track {
+    background: #2c2c2c;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* 暗黑主题 - 内容区域 */
+.dark-theme .content-area {
+    background: #1a1a1a;
 } 
