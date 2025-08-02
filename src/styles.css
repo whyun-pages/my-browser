@@ -428,23 +428,35 @@ webview.active {
         width: 100%;
     }
 }
-
-/* 滚动条样式 */
 ::-webkit-scrollbar {
-    width: 8px;
+    display: none;
+}
+/* 滚动条样式 - 简约细致设计 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 /* 暗黑主题样式 */
@@ -605,15 +617,25 @@ webview.active {
 
 /* 暗黑主题 - 滚动条 */
 .dark-theme ::-webkit-scrollbar-track {
-    background: #2c2c2c;
+    background: transparent;
 }
 
 .dark-theme ::-webkit-scrollbar-thumb {
-    background: #555;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 .dark-theme ::-webkit-scrollbar-thumb:hover {
-    background: #777;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.dark-theme ::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 /* 暗黑主题 - 内容区域 */
