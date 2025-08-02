@@ -115,6 +115,7 @@ class BrowserApp {
         webview.id = `webview-${tab.id}`;
         webview.src = tab.url;
         webview.className = 'webview';
+        webview.preload = './preload.js';
         
         // 启用跨域和其他功能
         webview.setAttribute('allowpopups', 'true');
@@ -387,7 +388,7 @@ class BrowserApp {
         });
 
         // 调试子菜单项点击事件
-        document.getElementById('open-devtools').addEventListener('click', () => {
+        document.getElementById('debug-menu').addEventListener('click', () => {
             this.openDevTools();
             this.hideAllMenus();
         });
