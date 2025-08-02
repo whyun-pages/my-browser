@@ -1,6 +1,6 @@
 const { ipcRenderer } = require('electron');
 const { Slogger } = require('node-slogger');
-const logger = new Slogger()
+const logger = new Slogger();
 class BrowserApp {
     constructor() {
         this.tabs = [];
@@ -52,9 +52,12 @@ class BrowserApp {
 
         // 键盘快捷键
         this.setupKeyboardShortcuts();
+        ipcRenderer.on('open-new-window', (event, handlerDetails) => {
+            this.createNewTab(handlerDetails.url, handlerDetails.referrer?.url);
+        });
     }
 
-    createNewTab(url = 'https://www.baidu.com') {
+    createNewTab(url = 'https://www.baidu.com', referer = '') {
         const tabId = ++this.tabCounter;
         
         // 创建标签页
@@ -63,7 +66,8 @@ class BrowserApp {
             title: '新标签页',
             url: url,
             canGoBack: false,
-            canGoForward: false
+            canGoForward: false,
+            referer: referer
         };
         
         this.tabs.push(tab);
@@ -116,11 +120,22 @@ class BrowserApp {
         webview.src = tab.url;
         webview.className = 'webview';
         webview.preload = './preload.js';
+        webview.allowpopups = true;
         
         // 启用跨域和其他功能
         webview.setAttribute('allowpopups', 'true');
         webview.setAttribute('disablewebsecurity', 'true');
         webview.setAttribute('webpreferences', 'allowRunningInsecureContent');
+
+        webview.addEventListener('did-attach', (event) => {
+            console.log('webview 已附加', event);
+            // event.sender.setWindowOpenHandler(({ url }) => {
+            //     console.log('打开:', url);
+            //     return { action: 'allow' }; // 新窗口
+            // });
+            const wcId = webview.getWebContentsId();
+            ipcRenderer.send('register-webview-handler', wcId);
+        });
         
         // webview 事件监听
         webview.addEventListener('dom-ready', () => {
@@ -151,6 +166,35 @@ class BrowserApp {
         webview.addEventListener('did-stop-loading', () => {
             this.updateNavigationButtons();
         });
+        webview.addEventListener('new-window', (event) => {
+            // 阻止默认行为（避免 Electron 自动弹出新窗口）
+            event.preventDefault();
+            
+            // 获取新窗口的目标 URL
+            const targetUrl = event.url;
+            
+            console.log('检测到 target=_blank 链接:', targetUrl);
+            
+            // 自定义处理方式：
+            // 1. 在当前 webview 中打开（替换当前页面）
+            // webview.loadURL(targetUrl);
+            
+            // 2. 在系统默认浏览器中打开
+            const { shell } = require('electron');
+            shell.openExternal(targetUrl);
+            
+            // 3. 打开一个新的 Electron 窗口
+            // const { BrowserWindow } = require('electron').remote;
+            // const newWindow = new BrowserWindow({
+            //   width: 800,
+            //   height: 600,
+            //   webPreferences: {
+            //     nodeIntegration: false,
+            //     contextIsolation: true
+            //   }
+            // });
+            // newWindow.loadURL(targetUrl);
+          });
         
         contentArea.appendChild(webview);
     }
