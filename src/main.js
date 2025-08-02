@@ -47,6 +47,14 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  // ✅ 1. 解决 Windows PowerShell 中文乱码问题
+  if (process.platform === 'win32') {
+    try {
+      process.stdout.setDefaultEncoding('utf8'); // 强制 UTF-8 输出
+    } catch (e) {
+      console.warn('无法设置 stdout 编码为 UTF-8', e);
+    }
+  }
 
   // 开发环境下打开开发者工具
   logger.info('process.env.NODE_ENV', process.env.NODE_ENV);
