@@ -16,6 +16,11 @@ class BrowserApp {
         this.loadBookmarks();
         this.initTheme();
         this.createNewTab('https://www.baidu.com');
+        
+        // 初始化时调整标签页宽度
+        setTimeout(() => {
+            this.adjustTabWidths();
+        }, 100);
     }
 
     setupEventListeners() {
@@ -54,6 +59,13 @@ class BrowserApp {
         this.setupKeyboardShortcuts();
         ipcRenderer.on('open-new-window', (event, handlerDetails) => {
             this.createNewTab(handlerDetails.url, handlerDetails.referrer?.url);
+        });
+
+        // 监听窗口大小变化，重新调整标签页宽度
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                this.adjustTabWidths();
+            }, 100);
         });
     }
 
@@ -110,6 +122,9 @@ class BrowserApp {
         });
         
         tabsContainer.appendChild(tabElement);
+        
+        // 重新计算标签页宽度
+        this.adjustTabWidths();
     }
 
     createWebView(tab) {
@@ -249,12 +264,17 @@ class BrowserApp {
                 this.switchToTab(remainingTab.id);
             }
         }
+        
+        // 重新计算标签页宽度
+        this.adjustTabWidths();
     }
 
     updateTabTitle(tabId, title) {
         const tabElement = document.querySelector(`[data-tab-id="${tabId}"] .tab-title`);
         if (tabElement) {
-            tabElement.textContent = title.length > 20 ? title.substring(0, 20) + '...' : title;
+            // 根据标签页数量动态调整标题长度
+            const maxLength = this.getMaxTitleLength();
+            tabElement.textContent = title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
         }
         
         // 更新标签页数据
@@ -262,6 +282,61 @@ class BrowserApp {
         if (tab) {
             tab.title = title;
         }
+    }
+
+    // 根据标签页数量计算最大标题长度
+    getMaxTitleLength() {
+        const tabCount = this.tabs.length;
+        if (tabCount <= 2) return 25;
+        if (tabCount <= 4) return 20;
+        if (tabCount <= 6) return 15;
+        if (tabCount <= 8) return 12;
+        return 8; // 8个以上标签页时，标题最短
+    }
+
+    // 动态调整标签页宽度
+    adjustTabWidths() {
+        const tabsContainer = document.getElementById('tabs');
+        const tabs = tabsContainer.querySelectorAll('.tab');
+        
+        if (tabs.length === 0) return;
+        
+        // 获取容器宽度
+        const containerWidth = tabsContainer.offsetWidth;
+        const tabCount = tabs.length;
+        
+        // 计算每个标签页的宽度
+        let tabWidth = Math.floor(containerWidth / tabCount);
+        
+        // 设置最小宽度和最大宽度限制
+        const minWidth = 100;
+        const maxWidth = 250;
+        
+        if (tabWidth < minWidth) {
+            tabWidth = minWidth;
+        } else if (tabWidth > maxWidth) {
+            tabWidth = maxWidth;
+        }
+        
+        // 应用宽度到所有标签页
+        tabs.forEach(tab => {
+            tab.style.flexBasis = `${tabWidth}px`;
+            tab.style.minWidth = `${Math.min(tabWidth, minWidth)}px`;
+            tab.style.maxWidth = `${tabWidth}px`;
+        });
+        
+        // 如果标签页总宽度超过容器宽度，启用滚动
+        const totalTabWidth = tabWidth * tabCount;
+        if (totalTabWidth > containerWidth) {
+            tabsContainer.style.overflowX = 'auto';
+        } else {
+            tabsContainer.style.overflowX = 'hidden';
+        }
+        
+        // 更新所有标签页的标题显示
+        this.tabs.forEach(tab => {
+            this.updateTabTitle(tab.id, tab.title);
+        });
     }
 
     updateAddressBar(url) {

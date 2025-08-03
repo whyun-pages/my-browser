@@ -215,27 +215,29 @@ body {
 .tabs-container {
     background: #f8f9fa;
     border-bottom: 1px solid #e1e5e9;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden; /* 防止出现滚动条 */
+    position: relative;
 }
 
 .tabs {
     display: flex;
     min-height: 40px;
     align-items: stretch;
+    width: 100%; /* 确保占满容器宽度 */
 }
 
 .tab {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 8px 12px; /* 减少左右内边距以节省空间 */
     background: #e9ecef;
     border: none;
     border-top: 3px solid transparent;
     cursor: pointer;
-    min-width: 150px;
-    max-width: 250px;
+    flex: 1; /* 平均分配可用空间 */
+    min-width: 100px; /* 设置最小宽度，防止过窄 */
+    max-width: 250px; /* 设置最大宽度，防止标签页过宽 */
     font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
@@ -516,12 +518,16 @@ webview.active {
 .dark-theme .tabs-container {
     background: #2c2c2c;
     border-bottom: 1px solid #444;
+    overflow: hidden; /* 防止出现滚动条 */
 }
 
 .dark-theme .tab {
     background: #3c3c3c;
     color: #e0e0e0;
     border-top: 3px solid transparent;
+    flex: 1; /* 平均分配可用空间 */
+    min-width: 100px; /* 设置最小宽度，防止过窄 */
+    max-width: 250px; /* 设置最大宽度，防止标签页过宽 */
 }
 
 .dark-theme .tab:hover {
