@@ -43,7 +43,6 @@ pnpm start
 ```bash
 pnpm build
 ```
-```
 
 ## 使用说明
 
