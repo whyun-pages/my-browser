@@ -15,7 +15,8 @@ class BrowserApp {
         this.setupEventListeners();
         this.loadBookmarks();
         this.initTheme();
-        this.createNewTab('https://www.baidu.com');
+        this.createNewTabButton(); // 创建新建按钮
+        this.createNewTab('https://www.bing.com');
         
         // 初始化时调整标签页宽度
         setTimeout(() => {
@@ -49,8 +50,8 @@ class BrowserApp {
         document.getElementById('bookmarks-list-btn').addEventListener('click', () => this.toggleBookmarksSidebar());
         document.getElementById('close-sidebar').addEventListener('click', () => this.toggleBookmarksSidebar());
 
-        // 新建标签页
-        document.getElementById('new-tab-btn').addEventListener('click', () => this.createNewTab());
+        // 新建标签页 (动态绑定)
+        // 事件监听器将在 createNewTabButton() 中添加
 
         // 设置菜单
         this.setupSettingsMenu();
@@ -69,7 +70,7 @@ class BrowserApp {
         });
     }
 
-    createNewTab(url = 'https://www.baidu.com', referer = '') {
+    createNewTab(url = 'https://www.bing.com', referer = '') {
         const tabId = ++this.tabCounter;
         
         // 创建标签页
@@ -138,7 +139,7 @@ class BrowserApp {
         
         // 启用跨域和其他功能
         webview.setAttribute('allowpopups', 'true');
-        webview.setAttribute('disablewebsecurity', 'true');
+        // webview.setAttribute('disablewebsecurity', 'true');
         webview.setAttribute('webpreferences', 'allowRunningInsecureContent');
 
         webview.addEventListener('did-attach', (event) => {
@@ -154,6 +155,19 @@ class BrowserApp {
         // webview 事件监听
         webview.addEventListener('dom-ready', () => {
             // DOM 准备就绪，但不立即更新导航按钮，等待导航事件
+            console.log('dom-ready', webview);
+            // let title = '';
+            // try {
+            //     title = webview.getTitle();
+            // } catch (error) {
+            //     console.error('获取页面标题失败:', error);
+            // }
+            // if (title) {
+            //     console.log('get title', title);
+            //     tab.title = title;
+            //     this.updateTabTitle(tab.id, title);
+            //     this.updateNavigationButtons();
+            // }
         });
         
         webview.addEventListener('did-navigate', (e) => {
@@ -163,6 +177,7 @@ class BrowserApp {
         });
         
         webview.addEventListener('did-navigate-in-page', (e) => {
+            this.updateTabTitle(tab.id, '加载中...');
             tab.url = e.url;
             this.updateAddressBar(e.url);
             this.updateNavigationButtons();
@@ -175,41 +190,15 @@ class BrowserApp {
         });
         
         webview.addEventListener('did-start-loading', () => {
-            this.updateTabTitle(tab.id, '加载中...');
+            // 
         });
         
         webview.addEventListener('did-stop-loading', () => {
             this.updateNavigationButtons();
         });
-        webview.addEventListener('new-window', (event) => {
-            // 阻止默认行为（避免 Electron 自动弹出新窗口）
-            event.preventDefault();
-            
-            // 获取新窗口的目标 URL
-            const targetUrl = event.url;
-            
-            console.log('检测到 target=_blank 链接:', targetUrl);
-            
-            // 自定义处理方式：
-            // 1. 在当前 webview 中打开（替换当前页面）
-            // webview.loadURL(targetUrl);
-            
-            // 2. 在系统默认浏览器中打开
-            const { shell } = require('electron');
-            shell.openExternal(targetUrl);
-            
-            // 3. 打开一个新的 Electron 窗口
-            // const { BrowserWindow } = require('electron').remote;
-            // const newWindow = new BrowserWindow({
-            //   width: 800,
-            //   height: 600,
-            //   webPreferences: {
-            //     nodeIntegration: false,
-            //     contextIsolation: true
-            //   }
-            // });
-            // newWindow.loadURL(targetUrl);
-          });
+        webview.addEventListener('did-finish-load', async (e) => {
+            console.log('did-finish-load', e);
+        });
         
         contentArea.appendChild(webview);
     }
@@ -294,6 +283,29 @@ class BrowserApp {
         return 8; // 8个以上标签页时，标题最短
     }
 
+    // 创建新建标签页按钮
+    createNewTabButton() {
+        const tabsContainer = document.getElementById('tabs');
+        
+        // 创建新建按钮
+        const newTabBtn = document.createElement('button');
+        newTabBtn.id = 'new-tab-btn';
+        newTabBtn.className = 'new-tab-btn';
+        newTabBtn.title = '新建标签页';
+        newTabBtn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+        `;
+        
+        // 添加点击事件
+        newTabBtn.addEventListener('click', () => this.createNewTab());
+        
+        // 插入到标签页容器
+        tabsContainer.appendChild(newTabBtn);
+    }
+
     // 动态调整标签页宽度
     adjustTabWidths() {
         const tabsContainer = document.getElementById('tabs');
@@ -302,11 +314,12 @@ class BrowserApp {
         if (tabs.length === 0) return;
         
         // 获取容器宽度
-        const containerWidth = tabsContainer.offsetWidth;
+        const containerWidth = document.querySelector('.tabs-container').offsetWidth;
+        const newTabBtnWidth = 40; // 新建按钮固定宽度
         const tabCount = tabs.length;
         
-        // 计算每个标签页的宽度
-        let tabWidth = Math.floor(containerWidth / tabCount);
+        // 计算每个标签页的理想宽度
+        let tabWidth = Math.floor((containerWidth - newTabBtnWidth) / tabCount);
         
         // 设置最小宽度和最大宽度限制
         const minWidth = 100;
@@ -325,12 +338,16 @@ class BrowserApp {
             tab.style.maxWidth = `${tabWidth}px`;
         });
         
-        // 如果标签页总宽度超过容器宽度，启用滚动
-        const totalTabWidth = tabWidth * tabCount;
-        if (totalTabWidth > containerWidth) {
-            tabsContainer.style.overflowX = 'auto';
+        // 计算实际需要的总宽度
+        const totalNeededWidth = (tabWidth * tabCount) + newTabBtnWidth;
+        
+        // 设置tabs容器的宽度
+        if (totalNeededWidth > containerWidth) {
+            // 需要滚动
+            tabsContainer.style.width = `${totalNeededWidth}px`;
         } else {
-            tabsContainer.style.overflowX = 'hidden';
+            // 占满可用空间
+            tabsContainer.style.width = '100%';
         }
         
         // 更新所有标签页的标题显示
@@ -367,10 +384,12 @@ class BrowserApp {
                 url = 'https://' + url;
             } else {
                 // 否则作为搜索查询
-                url = `https://www.baidu.com/s?wd=${encodeURIComponent(url)}`;
+                url = `https://www.bing.com/search?q=${encodeURIComponent(url)}`;
             }
         }
-        
+        /**
+         * @type {import('electron').WebviewTag}
+         */
         const activeWebview = document.querySelector('webview.active');
         if (activeWebview) {
             activeWebview.src = url;
@@ -399,7 +418,7 @@ class BrowserApp {
     }
 
     goHome() {
-        this.navigate('https://www.baidu.com');
+        this.navigate('https://www.bing.com');
     }
 
     async addBookmark() {

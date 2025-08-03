@@ -52,7 +52,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  // ✅ 1. 解决 Windows PowerShell 中文乱码问题
+
   if (process.platform === 'win32') {
     try {
       process.stdout.setDefaultEncoding('utf8'); // 强制 UTF-8 输出
@@ -67,28 +67,13 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  // mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-  //   logger.info('拦截新窗口打开:', url);
-  //   return { action: 'deny' }; // 阻止新窗口
-  // });
-
-  // 监听来自渲染进程的 webview 注册请求
-  ipcMain.on('register-webview-handler', (event, wcId) => {
-    const wc = webContents.fromId(wcId);
-    if (wc) {
-      logger.info('注册 webview 拦截新窗口:', wcId, wc);
-      wc.setWindowOpenHandler((handlerDetails) => {
-        if (handlerDetails.disposition === 'foreground-tab') {
-          console.log('webview 拦截新窗口:', handlerDetails);
-          mainWindow.webContents.send('open-new-window', handlerDetails);
-          return { action: 'deny' };
-        }
-        return { action: 'allow' };
-      });
-      // wc.setWindowOpenHandler(({ url }) => {
-      //   console.log('webview 拦截新窗口:', url);
-      //   return { action: 'allow' };
-      // });
+  mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    if (details.requestHeaders['User-Agent']) {
+      details.requestHeaders['User-Agent'] = details.requestHeaders['User-Agent']
+        .replace(/Electron\/[^\s]+/g, ''); // 去掉 Electron 标识
+        callback({cancel: false, requestHeaders: details.requestHeaders});
+    } else {
+      callback({cancel: false});
     }
   });
 
@@ -108,6 +93,22 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+// 监听来自渲染进程的 webview 注册请求
+ipcMain.on('register-webview-handler', (event, wcId) => {
+  const wc = webContents.fromId(wcId);
+  if (wc) {
+    logger.info('注册 webview 拦截新窗口:', wcId, wc);
+    wc.setWindowOpenHandler((handlerDetails) => {
+      if (handlerDetails.disposition === 'foreground-tab') {
+        console.log('webview 拦截新窗口:', handlerDetails);
+        mainWindow.webContents.send('open-new-window', handlerDetails);
+        return { action: 'deny' };
+      }
+      return { action: 'allow' };
+    });
+  }
 });
 
 // 所有窗口关闭时退出应用程序（除了 macOS）
