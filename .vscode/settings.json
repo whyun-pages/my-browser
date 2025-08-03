@@ -1,0 +1,25 @@
+{
+  // 终端编码设置
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "args": ["-NoExit", "-Command", "chcp 65001"]
+    },
+    "Command Prompt": {
+      "path": "cmd.exe",
+      "args": ["/k", "chcp 65001"]
+    }
+  },
+  // 文件编码设置
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": true,
+  
+  // 终端字体设置（支持中文显示）
+  "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+  "terminal.integrated.fontSize": 14,
+  
+  // 调试控制台编码
+  "debug.console.fontSize": 14,
+  "debug.console.fontFamily": "Consolas, 'Courier New', monospace"
+}

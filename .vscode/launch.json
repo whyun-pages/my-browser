@@ -1,0 +1,66 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Electron 主进程",
+        "type": "node",
+        "request": "launch",
+        "cwd": "${workspaceRoot}",
+        "console": "integratedTerminal",
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+        "runtimeArgs": [
+          "--inspect=5858",
+          "--enable-logging",
+          "--lang=zh-CN",
+          "${workspaceRoot}/src/main.js"
+        ],
+        "env": {
+          "NODE_ENV": "development",
+          "ELECTRON_ENABLE_LOGGING": "1"
+        },
+        "windows": {
+          "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
+        }
+      },
+      {
+        "name": "Debug Electron 渲染进程",
+        "type": "chrome",
+        "request": "attach",
+        "port": 9222,
+        "webRoot": "${workspaceRoot}/src",
+        "timeout": 30000
+      },
+      {
+        "name": "Debug Electron 完整模式",
+        "type": "node",
+        "request": "launch", 
+        "cwd": "${workspaceRoot}",
+        "console": "integratedTerminal",
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+        "runtimeArgs": [
+          "--inspect=5858",
+          "--remote-debugging-port=9222",
+          "--enable-logging",
+          "--lang=zh-CN",
+          "."
+        ],
+        "env": {
+          "NODE_ENV": "development",
+          "ELECTRON_ENABLE_LOGGING": "1"
+        },
+        "windows": {
+          "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
+        }
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Debug Electron 全部进程",
+        "configurations": [
+          "Debug Electron 主进程",
+          "Debug Electron 渲染进程"
+        ]
+      }
+    ]
+  }
+  

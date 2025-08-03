@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "env-cmd -f .env electron . --enable-logging",
+    "dev": "env-cmd -f .env electron . --enable-logging --lang=zh-CN",
     "build": "electron-builder",
     "pack": "electron-builder --dir"
   },
@@ -22,7 +22,7 @@
     "env-cmd": "^10.1.0"
   },
   "build": {
-    "appId": "com.example.my-browser",
+    "appId": "com.whyun.my-browser",
     "productName": "My Browser",
     "directories": {
       "output": "dist"

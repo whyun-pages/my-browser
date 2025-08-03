@@ -120,7 +120,6 @@ class BrowserApp {
         webview.src = tab.url;
         webview.className = 'webview';
         webview.preload = './preload.js';
-        webview.allowpopups = true;
         
         // 启用跨域和其他功能
         webview.setAttribute('allowpopups', 'true');
@@ -156,6 +155,7 @@ class BrowserApp {
         
         webview.addEventListener('page-title-updated', (e) => {
             tab.title = e.title;
+            console.log('page-title-updated', e.title);
             this.updateTabTitle(tab.id, e.title);
         });
         

@@ -67,10 +67,10 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    logger.info('拦截新窗口打开:', url);
-    return { action: 'deny' }; // 阻止新窗口
-  });
+  // mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+  //   logger.info('拦截新窗口打开:', url);
+  //   return { action: 'deny' }; // 阻止新窗口
+  // });
 
   // 监听来自渲染进程的 webview 注册请求
   ipcMain.on('register-webview-handler', (event, wcId) => {
