@@ -43,20 +43,6 @@ pnpm start
 ```bash
 pnpm build
 ```
-
-## 项目结构
-
-```
-my-browser/
-├── src/
-│   ├── main.js          # Electron 主进程
-│   ├── index.html       # 浏览器界面
-│   ├── styles.css       # 样式文件
-│   ├── renderer.js      # 渲染进程逻辑
-│   └── bookmarks.json   # 书签数据（自动生成）
-├── package.json         # 项目配置
-├── task.md             # 需求文档
-└── README.md           # 说明文档
 ```
 
 ## 使用说明
@@ -122,3 +108,8 @@ my-browser/
 ## 许可证
 
 MIT License 
+
+## TODO
+[ ] 使用 electron-vite 重构项目
+[ ] 展示loading 图标
+[ ] tab 标签显示favicon
