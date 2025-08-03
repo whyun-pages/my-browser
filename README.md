@@ -113,3 +113,4 @@ MIT License
 [ ] 使用 electron-vite 重构项目
 [ ] 展示loading 图标
 [ ] tab 标签显示favicon
+[ ] 新建标签页使用默认模板进行渲染

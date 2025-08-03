@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导航页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // 主色调：深紫色
+                        secondary: '#10B981', // 辅助色：绿色
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+            .glass-effect {
+                @apply bg-white/10 backdrop-blur-md border border-white/20;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 min-h-screen text-light overflow-x-hidden">
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-40 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 头部区域 -->
+        <header class="mb-12 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+                导航中心
+            </h1>
+            <p class="text-slate-300 text-lg max-w-2xl mx-auto">
+                一站式访问您常用的网站和工具，提升浏览效率
+            </p>
+        </header>
+
+        <!-- 搜索区域 -->
+        <div class="mb-12 max-w-2xl mx-auto relative">
+            <div class="flex items-center absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <i class="fa fa-search text-xl"></i>
+            </div>
+            <input 
+                type="text" 
+                placeholder="搜索网站或内容..." 
+                class="w-full py-4 pl-12 pr-4 rounded-full glass-effect focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            >
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 flex space-x-2">
+                <button class="p-2 rounded-full hover:bg-white/20 transition-colors">
+                    <i class="fa fa-microphone text-slate-300"></i>
+                </button>
+                <button class="p-2 rounded-full hover:bg-white/20 transition-colors">
+                    <i class="fa fa-camera text-slate-300"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 快速访问 -->
+        <section class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white">快速访问</h2>
+                <button class="text-sm text-primary hover:text-primary/80 flex items-center transition-colors">
+                    <i class="fa fa-plus-circle mr-1"></i> 添加
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                <!-- 快速访问图标 -->
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-youtube-play text-red-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">YouTube</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-facebook text-blue-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">Facebook</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-twitter text-sky-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">Twitter</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-whatsapp text-green-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">WhatsApp</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-instagram text-purple-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">Instagram</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-linkedin text-blue-500 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">LinkedIn</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-google text-orange-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">Google</span>
+                </a>
+                
+                <a href="#" class="flex flex-col items-center p-4 rounded-xl glass-effect card-hover">
+                    <div class="w-12 h-12 rounded-full bg-gray-500/20 flex items-center justify-center mb-2">
+                        <i class="fa fa-github text-gray-400 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-center">GitHub</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 分类导航 -->
+        <section class="mb-16">
+            <h2 class="text-xl font-bold text-white mb-6">网站分类</h2>
+            
+            <!-- 科技类 -->
+            <div class="mb-10">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-2">
+                        <i class="fa fa-microchip text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold">科技</h3>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-apple text-xl text-gray-300 w-6"></i>
+                        <span>Apple</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-android text-xl text-gray-300 w-6"></i>
+                        <span>Android</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-microsoft text-xl text-gray-300 w-6"></i>
+                        <span>Microsoft</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-linux text-xl text-gray-300 w-6"></i>
+                        <span>Linux</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 工具类 -->
+            <div class="mb-10">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center mr-2">
+                        <i class="fa fa-wrench text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold">工具</h3>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-calculator text-xl text-gray-300 w-6"></i>
+                        <span>计算器</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-clock-o text-xl text-gray-300 w-6"></i>
+                        <span>时区转换</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-exchange text-xl text-gray-300 w-6"></i>
+                        <span>货币转换</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-language text-xl text-gray-300 w-6"></i>
+                        <span>翻译</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 学习类 -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center mr-2">
+                        <i class="fa fa-book text-purple-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold">学习</h3>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-graduation-cap text-xl text-gray-300 w-6"></i>
+                        <span>Coursera</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-code text-xl text-gray-300 w-6"></i>
+                        <span>LeetCode</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-book text-xl text-gray-300 w-6"></i>
+                        <span>维基百科</span>
+                    </a>
+                    <a href="#" class="p-4 rounded-xl glass-effect flex items-center space-x-3 card-hover">
+                        <i class="fa fa-video-camera text-xl text-gray-300 w-6"></i>
+                        <span>可汗学院</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部区域 -->
+        <footer class="text-center text-slate-400 text-sm py-6 border-t border-white/10">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-4">
+                <a href="#" class="hover:text-primary transition-colors">设置</a>
+                <a href="#" class="hover:text-primary transition-colors">关于</a>
+                <a href="#" class="hover:text-primary transition-colors">反馈</a>
+                <a href="#" class="hover:text-primary transition-colors">隐私政策</a>
+            </div>
+            <p>© 2023 导航中心 | 设计与开发</p>
+        </footer>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <button id="themeToggle" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg hover:bg-primary/80 transition-colors">
+        <i class="fa fa-moon-o text-white"></i>
+    </button>
+
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        let isDarkMode = true;
+        
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            
+            if (isDarkMode) {
+                // 切换到深色模式
+                document.body.className = 'font-inter bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 min-h-screen text-light overflow-x-hidden';
+                themeToggle.innerHTML = '<i class="fa fa-moon-o text-white"></i>';
+            } else {
+                // 切换到浅色模式
+                document.body.className = 'font-inter bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 min-h-screen text-dark overflow-x-hidden';
+                themeToggle.innerHTML = '<i class="fa fa-sun-o text-yellow-500"></i>';
+                themeToggle.classList.remove('bg-primary');
+                themeToggle.classList.add('bg-yellow-400');
+            }
+        });
+
+        // 搜索框功能模拟
+        const searchInput = document.querySelector('input[placeholder="搜索网站或内容..."]');
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                alert(`搜索内容: ${searchInput.value}`);
+                // 实际应用中这里会执行搜索逻辑
+                searchInput.value = '';
+            }
+        });
+
+        // 添加卡片动画效果
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.classList.add('scale-105');
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.classList.remove('scale-105');
+            });
+        });
+    </script>
+</body>
+</html>
