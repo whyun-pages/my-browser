@@ -7,7 +7,14 @@
     "start": "electron .",
     "dev": "env-cmd -f .env electron . --enable-logging --lang=zh-CN",
     "build": "electron-builder",
-    "pack": "electron-builder --dir"
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --publish=never",
+    "release": "electron-builder --publish=always",
+    "postinstall": "electron-builder install-app-deps",
+    "icons": "node scripts/create-icons.js"
   },
   "keywords": [
     "electron",
@@ -29,8 +36,74 @@
     },
     "files": [
       "src/**/*",
-      "node_modules/**/*"
-    ]
+      "node_modules/**/*",
+      "!node_modules/.cache",
+      "!node_modules/.pnpm"
+    ],
+    "extraResources": [
+      {
+        "from": "README.md",
+        "to": "README.md"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "publisherName": "Your Name",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        },
+        {
+          "target": "tar.gz",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "Development"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "your-github-username",
+      "repo": "my-browser"
+    }
   },
   "dependencies": {
     "node-slogger": "^3.0.0"

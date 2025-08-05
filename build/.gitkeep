@@ -1,0 +1,6 @@
+# 这个目录用于存放构建所需的图标文件
+# 
+# 需要的文件:
+# - icon.ico (Windows, 256x256)  
+# - icon.icns (macOS, 512x512)
+# - icon.png (Linux, 512x512)
