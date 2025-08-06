@@ -104,7 +104,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "yunnysunny",
+      "owner": "whyun/pages",
       "repo": "my-browser"
     }
   },
