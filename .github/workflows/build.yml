@@ -5,7 +5,6 @@ on:
   push:
     branches: [ main ]
   # 在创建tag时运行（用于发布）
-  push:
     tags:
       - 'v*'
   # 允许手动触发
