@@ -62,6 +62,8 @@ jobs:
   # 构建job - 支持多平台
   build:
     needs: test
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
