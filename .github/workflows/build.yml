@@ -135,7 +135,7 @@ jobs:
         run: pnpm run build
         env:
           # GitHub token用于发布
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # 跳过macOS公证（如果没有开发者账号）
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
