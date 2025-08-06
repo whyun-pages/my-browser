@@ -172,35 +172,35 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         # if: github.ref_type == 'tag'
-        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
         with:
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
           files: |
             artifacts/my-browser-windows-latest/my-browser-windows.zip
             artifacts/my-browser-macos-latest/my-browser-macos.zip
             artifacts/my-browser-ubuntu-latest/my-browser-linux.zip
-        body: |
-          ## 🚀 My Browser ${{ github.ref_name }}
-          
-          ### 📦 安装包下载
-          
-          #### Windows
-          - `.exe` - Windows安装程序
-          
-          #### macOS
-          - `.dmg` - macOS磁盘映像
-          
-          #### Linux
-          - `.AppImage` - 便携式应用程序
-          - `.deb` - Debian/Ubuntu包
-          - `.rpm` - Red Hat/Fedora包
-          
-          ### 🔄 更新内容
-          
-          请查看提交历史了解详细更新内容。
-          
-          ---
-          
-          **完整更新日志**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
+          body: |
+            ## 🚀 My Browser ${{ github.ref_name }}
+            
+            ### 📦 安装包下载
+            
+            #### Windows
+            - `.exe` - Windows安装程序
+            
+            #### macOS
+            - `.dmg` - macOS磁盘映像
+            
+            #### Linux
+            - `.AppImage` - 便携式应用程序
+            - `.deb` - Debian/Ubuntu包
+            - `.rpm` - Red Hat/Fedora包
+            
+            ### 🔄 更新内容
+            
+            请查看提交历史了解详细更新内容。
+            
+            ---
+            
+            **完整更新日志**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
 
       # - name: Create Release
       #   id: create_release
