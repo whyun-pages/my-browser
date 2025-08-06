@@ -53,7 +53,7 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": ["x64"]
         },
         {
           "target": "portable",
@@ -61,7 +61,7 @@
         }
       ],
       "icon": "build/icon.ico",
-      "publisherName": "Your Name",
+      "publisherName": "whyun",
       "requestedExecutionLevel": "asInvoker"
     },
     "mac": {
