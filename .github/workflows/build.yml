@@ -4,7 +4,7 @@ on:
   # 在push到main分支时运行（用于测试构建）
   push:
     branches: [ main ]
-  # 在创建tag时运行（用于发布）
+    # 在创建tag时运行（用于发布）
     tags:
       - 'v*'
   # 允许手动触发
@@ -174,13 +174,12 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        # if: github.ref_type == 'tag'
         with:
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
           files: |
-            artifacts/my-browser-windows-latest/my-browser-windows.zip
-            artifacts/my-browser-macos-latest/my-browser-macos.zip
-            artifacts/my-browser-ubuntu-latest/my-browser-linux.zip
+            artifacts/my-browser-windows-latest/*
+            artifacts/my-browser-macos-latest/*
+            artifacts/my-browser-ubuntu-latest/*
           body: |
             ## 🚀 My Browser ${{ github.ref_name }}
             
