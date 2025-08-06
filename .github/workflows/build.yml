@@ -179,8 +179,7 @@ jobs:
         with:
           draft: false
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
-          make_latest: true
-          fail_on_unmatched_files: false
+          overwrite: true
           files: |
             artifacts/my-browser-windows-latest/*
             artifacts/my-browser-macos-latest/*
