@@ -11,7 +11,7 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --asar --publish=never",
+    "dist": "electron-builder --publish=never",
     "release": "electron-builder --publish=always",
     "postinstall": "electron-builder install-app-deps",
     "icons": "node scripts/create-icons.js"
@@ -32,6 +32,7 @@
     "env-cmd": "^10.1.0"
   },
   "build": {
+    "asar": true,
     "appId": "com.whyun.my-browser",
     "productName": "My Browser",
     "directories": {
