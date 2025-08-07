@@ -165,18 +165,6 @@ class BrowserApp {
         webview.addEventListener('dom-ready', () => {
             // DOM 准备就绪，但不立即更新导航按钮，等待导航事件
             console.log('dom-ready', webview);
-            // let title = '';
-            // try {
-            //     title = webview.getTitle();
-            // } catch (error) {
-            //     console.error('获取页面标题失败:', error);
-            // }
-            // if (title) {
-            //     console.log('get title', title);
-            //     tab.title = title;
-            //     this.updateTabTitle(tab.id, title);
-            //     this.updateNavigationButtons();
-            // }
         });
         
         webview.addEventListener('did-navigate', (e) => {
@@ -187,7 +175,7 @@ class BrowserApp {
         
         webview.addEventListener('did-navigate-in-page', (e) => {
             // this.updateTabTitle(tab.id, '加载中...');
-            console.log('did-navigate-in-page', e);
+            console.log('did-navigate-in-page');
             tab.url = e.url;
             this.updateAddressBar(e.url);
             this.updateNavigationButtons();
@@ -245,9 +233,16 @@ class BrowserApp {
         if (this.tabs.length <= 1) {
             return; // 至少保留一个标签页
         }
-        
+        let tabIndex = 0;
         // 移除标签页数据
-        this.tabs = this.tabs.filter(tab => tab.id !== tabId);
+        this.tabs = this.tabs.filter((tab, index) => {
+            const isNotTabId = tab.id !== tabId;
+            if (isNotTabId) {
+                return true;
+            }
+            tabIndex = index;
+            return false;
+        });
         
         // 移除DOM元素
         const tabElement = document.querySelector(`[data-tab-id="${tabId}"]`);
@@ -258,7 +253,8 @@ class BrowserApp {
         
         // 如果关闭的是当前活动标签页，切换到其他标签页
         if (this.activeTabId === tabId) {
-            const remainingTab = this.tabs[0];
+            const switched2Index = tabIndex > 0 ? tabIndex - 1 : 0;
+            const remainingTab = this.tabs[switched2Index];
             if (remainingTab) {
                 this.switchToTab(remainingTab.id);
             }
@@ -752,13 +748,13 @@ class BrowserApp {
                 <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
                 <rect x="4" y="4" width="6" height="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
             `;
-            maximizeBtn.title = '还原';
+            // maximizeBtn.title = '还原';
         } else {
             // 显示最大化图标 (单个方框)
             svg.innerHTML = `
                 <rect x="2" y="2" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
             `;
-            maximizeBtn.title = '最大化';
+            // maximizeBtn.title = '最大化';
         }
     }
 }

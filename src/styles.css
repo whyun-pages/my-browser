@@ -62,7 +62,7 @@ body {
     flex: 1;
     display: flex;
     gap: 8px;
-    max-width: 600px;
+    width: 100%;
 }
 
 #address-bar {
@@ -84,13 +84,14 @@ body {
 .go-btn {
     background: rgba(255, 255, 255, 0.9);
     border: none;
-    border-radius: 16px;
+    border-radius: 6px;
     padding: 8px 16px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
     color: #333;
     transition: all 0.2s ease;
+    height: 36px; /* 与其他action按钮保持一致的高度 */
 }
 
 .go-btn:hover {
@@ -102,6 +103,7 @@ body {
 .action-buttons {
     display: flex;
     gap: 4px;
+    margin-left: auto; /* 确保按钮组右对齐 */
 }
 
 /* 设置按钮和菜单样式 */
@@ -294,7 +296,7 @@ body {
     padding: 0 8px;
     gap: 4px;
     background: #f8f9fa;
-    border-left: 1px solid #e1e5e9;
+    /* border-left: 1px solid #e1e5e9; */
     flex-shrink: 0;
 }
 
@@ -307,7 +309,7 @@ body {
     border: none;
     /* border-radius: 6px; */
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* transition: all 0.2s ease; */
     background: transparent;
     color: #666;
 }
@@ -584,6 +586,7 @@ webview.active {
 .dark-theme .go-btn {
     background: rgba(255, 255, 255, 0.1);
     color: #e0e0e0;
+    height: 36px; /* 确保暗黑主题下高度一致 */
 }
 
 .dark-theme .go-btn:hover {
