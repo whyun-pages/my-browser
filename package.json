@@ -30,7 +30,10 @@
     "electron": "^28.0.0",
     "electron-builder": "^24.6.4",
     "env-cmd": "^10.1.0",
-    "sharp": "^0.34.3"
+    "png-to-ico": "^2.1.8",
+    "png2icns": "^0.0.1",
+    "sharp": "^0.34.3",
+    "to-icns": "^0.0.7"
   },
   "build": {
     "asar": true,

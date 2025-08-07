@@ -12,6 +12,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const fsPromise = require('fs').promises;
+const png2ico = require('png-to-ico');
+const { convertToIcns } = require('to-icns');
+var png2icns = require('png2icns');
+
 
 // 检查是否有sharp库，如果没有提供安装指导
 try {
@@ -87,27 +92,50 @@ async function generateIcons() {
     console.log('🍎 生成 macOS 图标素材...');
     const sizes = [16, 32, 64, 128, 256, 512, 1024];
     
-    for (const size of sizes) {
-      await image
+    // for (const size of sizes) {
+    //   await image
+    //     .resize(size, size)
+    //     .png()
+    //     .toFile(path.join(buildDir, `icon-${size}.png`));
+    // }
+    const buffers = await Promise.all(sizes.map(size => {
+      return image
         .resize(size, size)
         .png()
-        .toFile(path.join(buildDir, `icon-${size}.png`));
-    }
-
+        .toBuffer();
+    }));
+    const iconSet = [];
+    await Promise.all(buffers.map(async(buffer, index) => {
+      const size = sizes[index];
+      const fullPath = path.join(buildDir, `icon-${size}.png`);
+      await fsPromise.writeFile(
+        fullPath, buffer
+      );
+      iconSet.push({
+        path: fullPath,
+        size,
+      });
+    }));
+    const bufferIco = await png2ico(buffers.slice(0,-2));
+    await fsPromise.writeFile(
+      path.join(buildDir, 'icon.ico'), bufferIco
+    );
+    const inPath = path.join(buildDir, `icon-${sizes[sizes.length - 1]}.png`);
+    // await convertToIcns(inPath);
     console.log('   ℹ️  已生成各尺寸PNG，建议使用工具制作ICNS文件');
     
     // 提供制作ICNS的命令（需要在macOS上运行）
-    console.log('\n📝 制作 ICNS 文件的命令（需要在 macOS 上运行）：');
-    console.log('   mkdir icon.iconset');
-    console.log('   cp build/icon-16.png icon.iconset/icon_16x16.png');
-    console.log('   cp build/icon-32.png icon.iconset/icon_32x32.png');
-    console.log('   cp build/icon-64.png icon.iconset/icon_32x32@2x.png');
-    console.log('   cp build/icon-128.png icon.iconset/icon_128x128.png');
-    console.log('   cp build/icon-256.png icon.iconset/icon_128x128@2x.png');
-    console.log('   cp build/icon-512.png icon.iconset/icon_256x256@2x.png');
-    console.log('   cp build/icon-1024.png icon.iconset/icon_512x512@2x.png');
-    console.log('   iconutil -c icns icon.iconset');
-    console.log('   mv icon.icns build/');
+    // console.log('\n📝 制作 ICNS 文件的命令（需要在 macOS 上运行）：');
+    // console.log('   mkdir icon.iconset');
+    // console.log('   cp build/icon-16.png icon.iconset/icon_16x16.png');
+    // console.log('   cp build/icon-32.png icon.iconset/icon_32x32.png');
+    // console.log('   cp build/icon-64.png icon.iconset/icon_32x32@2x.png');
+    // console.log('   cp build/icon-128.png icon.iconset/icon_128x128.png');
+    // console.log('   cp build/icon-256.png icon.iconset/icon_128x128@2x.png');
+    // console.log('   cp build/icon-512.png icon.iconset/icon_256x256@2x.png');
+    // console.log('   cp build/icon-1024.png icon.iconset/icon_512x512@2x.png');
+    // console.log('   iconutil -c icns icon.iconset');
+    // console.log('   mv icon.icns build/');
 
     console.log('\n✅ 图标生成完成！');
     console.log('📂 输出目录:', buildDir);
