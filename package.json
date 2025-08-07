@@ -11,7 +11,7 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --publish=never",
+    "dist": "electron-builder --asar --publish=never",
     "release": "electron-builder --publish=always",
     "postinstall": "electron-builder install-app-deps",
     "icons": "node scripts/create-icons.js"

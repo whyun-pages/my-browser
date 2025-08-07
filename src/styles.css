@@ -218,6 +218,8 @@ body {
     overflow-x: auto; /* 支持横向滚动 */
     overflow-y: hidden;
     position: relative;
+    display: flex;
+    align-items: stretch;
 }
 
 .tabs {
@@ -225,7 +227,8 @@ body {
     min-height: 40px;
     align-items: stretch;
     width: fit-content; /* 宽度适应内容 */
-    min-width: 100%; /* 最小宽度占满容器 */
+    min-width: calc(100% - 120px); /* 为窗口控制按钮预留空间 */
+    flex: 1;
 }
 
 .tab {
@@ -282,6 +285,54 @@ body {
 .tab-close:hover {
     background: rgba(0, 0, 0, 0.1);
     color: #000;
+}
+
+/* 窗口控制按钮样式 */
+.window-controls {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 4px;
+    background: #f8f9fa;
+    border-left: 1px solid #e1e5e9;
+    flex-shrink: 0;
+}
+
+.window-control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    /* border-radius: 6px; */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #666;
+}
+
+.window-control-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* .window-control-btn.minimize:hover {
+    background: #ffc107;
+    color: white;
+} */
+
+/* .window-control-btn.maximize:hover {
+    background: #28a745;
+    color: white;
+} */
+
+.window-control-btn.close:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.window-control-btn svg {
+    pointer-events: none;
 }
 
 /* 新建标签页按钮样式 */
@@ -560,6 +611,35 @@ webview.active {
     flex: 1; /* 平均分配可用空间 */
     min-width: 100px; /* 设置最小宽度，防止过窄 */
     max-width: 250px; /* 设置最大宽度，防止标签页过宽 */
+}
+
+/* 暗黑主题 - 窗口控制按钮 */
+.dark-theme .window-controls {
+    background: #2c2c2c;
+    border-left: 1px solid #444;
+}
+
+.dark-theme .window-control-btn {
+    color: #aaa;
+}
+
+.dark-theme .window-control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .window-control-btn.minimize:hover {
+    background: #ffc107;
+    color: white;
+}
+
+.dark-theme .window-control-btn.maximize:hover {
+    background: #28a745;
+    color: white;
+}
+
+.dark-theme .window-control-btn.close:hover {
+    background: #dc3545;
+    color: white;
 }
 
 /* 暗黑主题 - 新建标签页按钮 */

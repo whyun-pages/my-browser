@@ -48,6 +48,15 @@ class BrowserApp {
         // 收藏功能
         document.getElementById('bookmark-btn').addEventListener('click', () => this.addBookmark());
         document.getElementById('bookmarks-list-btn').addEventListener('click', () => this.toggleBookmarksSidebar());
+        
+        // 窗口控制按钮
+        document.getElementById('minimize-btn').addEventListener('click', () => this.minimizeWindow());
+        document.getElementById('maximize-btn').addEventListener('click', () => this.maximizeWindow());
+        document.getElementById('close-btn').addEventListener('click', () => this.closeWindow());
+        
+        // 监听窗口状态变化
+        ipcRenderer.on('window-maximized', () => this.updateMaximizeButton(true));
+        ipcRenderer.on('window-unmaximized', () => this.updateMaximizeButton(false));
         document.getElementById('close-sidebar').addEventListener('click', () => this.toggleBookmarksSidebar());
 
         // 新建标签页 (动态绑定)
@@ -177,7 +186,8 @@ class BrowserApp {
         });
         
         webview.addEventListener('did-navigate-in-page', (e) => {
-            this.updateTabTitle(tab.id, '加载中...');
+            // this.updateTabTitle(tab.id, '加载中...');
+            console.log('did-navigate-in-page', e);
             tab.url = e.url;
             this.updateAddressBar(e.url);
             this.updateNavigationButtons();
@@ -716,6 +726,39 @@ class BrowserApp {
             activeWebview.executeJavaScript(`
                 alert('My Browser v1.0.0\\n基于 Electron 开发的现代浏览器\\n\\n功能特性：\\n• 多标签页浏览\\n• 智能地址栏\\n• 书签管理\\n• 自动跨域支持\\n• 开发者工具');
             `);
+        }
+    }
+
+    // 窗口控制功能
+    minimizeWindow() {
+        ipcRenderer.send('window-minimize');
+    }
+
+    maximizeWindow() {
+        ipcRenderer.send('window-maximize');
+    }
+
+    closeWindow() {
+        ipcRenderer.send('window-close');
+    }
+
+    updateMaximizeButton(isMaximized) {
+        const maximizeBtn = document.getElementById('maximize-btn');
+        const svg = maximizeBtn.querySelector('svg');
+        
+        if (isMaximized) {
+            // 显示恢复窗口图标 (两个重叠的方框)
+            svg.innerHTML = `
+                <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <rect x="4" y="4" width="6" height="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            `;
+            maximizeBtn.title = '还原';
+        } else {
+            // 显示最大化图标 (单个方框)
+            svg.innerHTML = `
+                <rect x="2" y="2" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            `;
+            maximizeBtn.title = '最大化';
         }
     }
 }

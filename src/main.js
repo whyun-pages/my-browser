@@ -40,7 +40,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     // frame: false,
-    // titleBarStyle: 'hidden', // 隐藏标题栏但保留窗口控制按钮（macOS 适用）
+    titleBarStyle: 'hidden', // 隐藏标题栏但保留窗口控制按钮（macOS 适用）
 
     webPreferences: {
       webviewTag: true, // ⬅️ 必须启用
@@ -52,6 +52,9 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+  // 设置窗口状态监听器
+  setupWindowStateListener();
 
   if (process.platform === 'win32') {
     try {
@@ -138,6 +141,42 @@ ipcMain.handle('remove-bookmark', (event, id) => {
   bookmarks = bookmarks.filter(bookmark => bookmark.id !== id);
   saveBookmarks();
   return bookmarks;
+});
+
+// 窗口控制 IPC 处理器
+ipcMain.on('window-minimize', () => {
+  if (mainWindow) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.on('window-maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+// 监听窗口状态变化
+function setupWindowStateListener() {
+  if (mainWindow) {
+    mainWindow.on('maximize', () => {
+      mainWindow.webContents.send('window-maximized');
+    });
+    
+    mainWindow.on('unmaximize', () => {
+      mainWindow.webContents.send('window-unmaximized');
+    });
+  }
+}
+
+ipcMain.on('window-close', () => {
+  if (mainWindow) {
+    mainWindow.close();
+  }
 });
 
 // 禁用默认菜单
