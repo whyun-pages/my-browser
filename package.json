@@ -36,7 +36,7 @@
     "to-icns": "^0.0.7"
   },
   "build": {
-    "asar": true,
+    "asar": false,
     "appId": "com.whyun.my-browser",
     "productName": "My Browser",
     "directories": {
