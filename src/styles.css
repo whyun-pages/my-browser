@@ -222,6 +222,7 @@ body {
     position: relative;
     display: flex;
     align-items: stretch;
+    -webkit-app-region: drag; /* 允许拖动窗口 */
 }
 
 .tabs {
@@ -251,6 +252,7 @@ body {
     text-overflow: ellipsis;
     transition: all 0.2s ease;
     position: relative;
+    -webkit-app-region: no-drag; /* 标签页可点击，不可拖动 */
 }
 
 .tab:hover {
@@ -298,6 +300,7 @@ body {
     background: #f8f9fa;
     /* border-left: 1px solid #e1e5e9; */
     flex-shrink: 0;
+    -webkit-app-region: no-drag; /* 窗口控制区域不可拖动 */
 }
 
 .window-control-btn {
@@ -353,6 +356,7 @@ body {
     border-left: 1px solid #e1e5e9;
     flex-shrink: 0; /* 防止按钮被挤压 */
     order: 999; /* 确保按钮在所有标签页之后 */
+    -webkit-app-region: no-drag; /* 按钮可点击，不可拖动 */
 }
 
 .new-tab-btn:hover {

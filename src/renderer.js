@@ -15,7 +15,6 @@ class BrowserApp {
         this.setupEventListeners();
         this.loadBookmarks();
         this.initTheme();
-        this.createNewTabButton(); // 创建新建按钮
         this.createNewTab('https://www.bing.com');
         
         // 初始化时调整标签页宽度
@@ -25,6 +24,10 @@ class BrowserApp {
     }
 
     setupEventListeners() {
+        const newTabBtn = document.getElementById('new-tab-btn');
+        
+        // 新建标签页事件
+        newTabBtn.addEventListener('click', () => this.createNewTab());
         // 导航按钮
         document.getElementById('back-btn').addEventListener('click', () => this.goBack());
         document.getElementById('forward-btn').addEventListener('click', () => this.goForward());
@@ -59,9 +62,6 @@ class BrowserApp {
         ipcRenderer.on('window-unmaximized', () => this.updateMaximizeButton(false));
         document.getElementById('close-sidebar').addEventListener('click', () => this.toggleBookmarksSidebar());
 
-        // 新建标签页 (动态绑定)
-        // 事件监听器将在 createNewTabButton() 中添加
-
         // 设置菜单
         this.setupSettingsMenu();
 
@@ -76,6 +76,11 @@ class BrowserApp {
             setTimeout(() => {
                 this.adjustTabWidths();
             }, 100);
+        });
+        // 监听从 webview 发送的键盘事件
+        ipcRenderer.on('webview-keyboard-event', (event, data) => {
+            console.log('接收到 webview 键盘事件:', data);            
+            this.shortcutsListener(data);
         });
     }
 
@@ -283,29 +288,6 @@ class BrowserApp {
         if (tabCount <= 6) return 15;
         if (tabCount <= 8) return 12;
         return 8; // 8个以上标签页时，标题最短
-    }
-
-    // 创建新建标签页按钮
-    createNewTabButton() {
-        const tabsContainer = document.getElementById('tabs');
-        
-        // 创建新建按钮
-        const newTabBtn = document.createElement('button');
-        newTabBtn.id = 'new-tab-btn';
-        newTabBtn.className = 'new-tab-btn';
-        newTabBtn.title = '新建标签页';
-        newTabBtn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-        `;
-        
-        // 添加点击事件
-        newTabBtn.addEventListener('click', () => this.createNewTab());
-        
-        // 插入到标签页容器
-        tabsContainer.appendChild(newTabBtn);
     }
 
     // 动态调整标签页宽度
@@ -562,67 +544,75 @@ class BrowserApp {
             }
         });
     }
+    preventDefaultMayBe(e) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+    }
+    shortcutsListener(e) {
+        // F12 - 打开/关闭开发者工具
+        if (e.key === 'F12') {
+            this.preventDefaultMayBe(e); // 阻止浏览器默认行为
+            this.openDevTools();
+        }
+        
+        // Ctrl+R 或 F5 - 刷新页面
+        if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+            this.preventDefaultMayBe(e);
+            this.refresh();
+        }
+        
+        // Ctrl+Shift+R 或 Ctrl+F5 - 强制刷新
+        if ((e.ctrlKey && e.shiftKey && e.key === 'R') || (e.ctrlKey && e.key === 'F5')) {
+            this.preventDefaultMayBe(e);
+            this.hardReload();
+        }
+        
+        // Ctrl+T - 新建标签页
+        if (e.ctrlKey && e.key === 't') {
+            this.preventDefaultMayBe(e);
+            this.createNewTab();
+        }
+        
+        // Ctrl+W - 关闭当前标签页
+        if (e.ctrlKey && e.key === 'w') {
+            this.preventDefaultMayBe(e);
+            if (this.tabs.length > 1) {
+                this.closeTab(this.activeTabId);
+            }
+        }
+        
+        // Ctrl+D - 添加书签
+        if (e.ctrlKey && e.key === 'd') {
+            this.preventDefaultMayBe(e);
+            this.addBookmark();
+        }
+        
+        // Alt+Left - 后退
+        if (e.altKey && e.key === 'ArrowLeft') {
+            this.preventDefaultMayBe(e);
+            this.goBack();
+        }
+        
+        // Alt+Right - 前进
+        if (e.altKey && e.key === 'ArrowRight') {
+            this.preventDefaultMayBe(e);
+            this.goForward();
+        }
+        
+        // Ctrl+L - 聚焦地址栏
+        if (e.ctrlKey && e.key === 'l') {
+            this.preventDefaultMayBe(e);
+            document.getElementById('address-bar').focus();
+            document.getElementById('address-bar').select();
+        }
+    }
 
     setupKeyboardShortcuts() {
         // 全局键盘事件监听
-        document.addEventListener('keydown', (e) => {
-            // F12 - 打开/关闭开发者工具
-            if (e.key === 'F12') {
-                e.preventDefault(); // 阻止浏览器默认行为
-                this.openDevTools();
-            }
-            
-            // Ctrl+R 或 F5 - 刷新页面
-            if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
-                e.preventDefault();
-                this.refresh();
-            }
-            
-            // Ctrl+Shift+R 或 Ctrl+F5 - 强制刷新
-            if ((e.ctrlKey && e.shiftKey && e.key === 'R') || (e.ctrlKey && e.key === 'F5')) {
-                e.preventDefault();
-                this.hardReload();
-            }
-            
-            // Ctrl+T - 新建标签页
-            if (e.ctrlKey && e.key === 't') {
-                e.preventDefault();
-                this.createNewTab();
-            }
-            
-            // Ctrl+W - 关闭当前标签页
-            if (e.ctrlKey && e.key === 'w') {
-                e.preventDefault();
-                if (this.tabs.length > 1) {
-                    this.closeTab(this.activeTabId);
-                }
-            }
-            
-            // Ctrl+D - 添加书签
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                this.addBookmark();
-            }
-            
-            // Alt+Left - 后退
-            if (e.altKey && e.key === 'ArrowLeft') {
-                e.preventDefault();
-                this.goBack();
-            }
-            
-            // Alt+Right - 前进
-            if (e.altKey && e.key === 'ArrowRight') {
-                e.preventDefault();
-                this.goForward();
-            }
-            
-            // Ctrl+L - 聚焦地址栏
-            if (e.ctrlKey && e.key === 'l') {
-                e.preventDefault();
-                document.getElementById('address-bar').focus();
-                document.getElementById('address-bar').select();
-            }
-        });
+        window.addEventListener('keydown', (e) => {
+            this.shortcutsListener(e);
+        }, true);
     }
 
     hideAllMenus() {

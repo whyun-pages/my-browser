@@ -1,4 +1,5 @@
 // preload.js
+const { ipcRenderer } = require('electron');
 window.addEventListener('DOMContentLoaded', () => {
     const style = document.createElement('style');
     style.textContent = `

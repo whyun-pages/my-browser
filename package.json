@@ -37,7 +37,7 @@
   "build": {
     "asar": true,
     "appId": "com.whyun.my-browser",
-    "productName": "My Browser",
+    "productName": "MyBrowser",
     "directories": {
       "output": "dist"
     },
