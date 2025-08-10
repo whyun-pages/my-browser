@@ -14,8 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const fsPromise = require('fs').promises;
 const png2ico = require('png-to-ico');
-const { convertToIcns } = require('to-icns');
-var png2icns = require('png2icns');
+const { gen } = require('icns-gen')
 
 
 // 检查是否有sharp库，如果没有提供安装指导
@@ -64,86 +63,43 @@ async function generateIcons() {
       console.warn('   建议使用至少 512x512 的高质量图片');
     }
 
-    // 生成 Windows ICO (256x256)
-    console.log('🪟 生成 Windows 图标...');
-    await image
-      .resize(256, 256)
-      .png()
-      .toFile(path.join(buildDir, 'icon.png'));
-    
-    // 注意：生成真正的ICO文件需要额外的库，这里先生成PNG
-    // 可以使用在线工具或其他软件转换为ICO格式
-    console.log('   ℹ️  已生成 PNG 格式，建议转换为 ICO 格式');
-
     // 生成 Linux PNG (512x512)
     console.log('🐧 生成 Linux 图标...');
     await image
       .resize(512, 512)
       .png()
-      .toFile(path.join(buildDir, 'icon-512.png'));
+      .toFile(path.join(buildDir, 'icon.png'));
+    console.log('   ℹ️  已生成 PNG 格式');
 
-    // 复制一份作为默认Linux图标
-    fs.copyFileSync(
-      path.join(buildDir, 'icon-512.png'),
-      path.join(buildDir, 'icon.png')
-    );
 
     // 生成各种尺寸的PNG（用于ICNS制作）
     console.log('🍎 生成 macOS 图标素材...');
     const sizes = [16, 32, 64, 128, 256, 512, 1024];
     
-    // for (const size of sizes) {
-    //   await image
-    //     .resize(size, size)
-    //     .png()
-    //     .toFile(path.join(buildDir, `icon-${size}.png`));
-    // }
     const buffers = await Promise.all(sizes.map(size => {
       return image
         .resize(size, size)
         .png()
         .toBuffer();
     }));
-    const iconSet = [];
-    await Promise.all(buffers.map(async(buffer, index) => {
-      const size = sizes[index];
-      const fullPath = path.join(buildDir, `icon-${size}.png`);
-      await fsPromise.writeFile(
-        fullPath, buffer
-      );
-      iconSet.push({
-        path: fullPath,
-        size,
-      });
-    }));
+
+    await gen(buffers.map((buffer, index) => ({
+      buffer,
+      size: sizes[index],
+    })), path.join(buildDir, 'icon.icns'));
+    console.log('   ℹ️  已生成ICNS文件');
+
+    // 生成 Windows ICO (256x256)
+    console.log('🪟 生成 Windows 图标...');
+
     const bufferIco = await png2ico(buffers.slice(0,-2));
     await fsPromise.writeFile(
       path.join(buildDir, 'icon.ico'), bufferIco
     );
-    const inPath = path.join(buildDir, `icon-${sizes[sizes.length - 1]}.png`);
-    // await convertToIcns(inPath);
-    console.log('   ℹ️  已生成各尺寸PNG，建议使用工具制作ICNS文件');
-    
-    // 提供制作ICNS的命令（需要在macOS上运行）
-    // console.log('\n📝 制作 ICNS 文件的命令（需要在 macOS 上运行）：');
-    // console.log('   mkdir icon.iconset');
-    // console.log('   cp build/icon-16.png icon.iconset/icon_16x16.png');
-    // console.log('   cp build/icon-32.png icon.iconset/icon_32x32.png');
-    // console.log('   cp build/icon-64.png icon.iconset/icon_32x32@2x.png');
-    // console.log('   cp build/icon-128.png icon.iconset/icon_128x128.png');
-    // console.log('   cp build/icon-256.png icon.iconset/icon_128x128@2x.png');
-    // console.log('   cp build/icon-512.png icon.iconset/icon_256x256@2x.png');
-    // console.log('   cp build/icon-1024.png icon.iconset/icon_512x512@2x.png');
-    // console.log('   iconutil -c icns icon.iconset');
-    // console.log('   mv icon.icns build/');
+    console.log('   ℹ️  已生成ICO文件');
 
     console.log('\n✅ 图标生成完成！');
     console.log('📂 输出目录:', buildDir);
-    console.log('\n📋 后续步骤：');
-    console.log('1. Windows: 将 icon.png 转换为 icon.ico');
-    console.log('2. macOS: 使用上述命令制作 icon.icns');
-    console.log('3. Linux: icon.png 已可直接使用');
-
   } catch (error) {
     console.error('❌ 生成图标时出错:', error.message);
     process.exit(1);

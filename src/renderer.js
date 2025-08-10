@@ -152,19 +152,15 @@ class BrowserApp {
         webview.setAttribute('webpreferences', 'allowRunningInsecureContent');
 
         webview.addEventListener('did-attach', (event) => {
-            console.log('webview 已附加', event);
-            // event.sender.setWindowOpenHandler(({ url }) => {
-            //     console.log('打开:', url);
-            //     return { action: 'allow' }; // 新窗口
-            // });
-            const wcId = webview.getWebContentsId();
-            ipcRenderer.send('register-webview-handler', wcId);
+            console.log('webview 已附加');
         });
         
         // webview 事件监听
         webview.addEventListener('dom-ready', () => {
             // DOM 准备就绪，但不立即更新导航按钮，等待导航事件
-            console.log('dom-ready', webview);
+            console.log('dom-ready');
+            const wcId = webview.getWebContentsId();
+            ipcRenderer.send('register-webview-handler', wcId);
         });
         
         webview.addEventListener('did-navigate', (e) => {
@@ -195,7 +191,7 @@ class BrowserApp {
             this.updateNavigationButtons();
         });
         webview.addEventListener('did-finish-load', async (e) => {
-            console.log('did-finish-load', e);
+            console.log('did-finish-load');
         });
         
         contentArea.appendChild(webview);

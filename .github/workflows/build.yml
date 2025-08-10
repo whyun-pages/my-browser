@@ -132,7 +132,9 @@ jobs:
 
       # 构建应用
       - name: Build application
-        run: pnpm run dist
+        run: |
+          pnpm run icons
+          pnpm run dist
         env:
           # GitHub token用于发布
           # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
