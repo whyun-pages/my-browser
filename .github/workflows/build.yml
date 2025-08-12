@@ -110,6 +110,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libgtk-3-dev libxss1 libasound2-dev
+          printf '%s' "$CSC_LINK" | base64 --decode > windows_cert.pfx
 
       # macOS特定设置 - 设置证书（如果有的话）
       - name: Setup macOS certificate
@@ -118,6 +119,7 @@ jobs:
           # 如果你有Apple开发者证书，可以在这里配置
           # 现在先跳过代码签名
           echo "SKIP_NOTARIZATION=true" >> $GITHUB_ENV
+          printf '%s' "$CSC_LINK" | base64 --decode > windows_cert.pfx
         env:
           # 添加这些环境变量以跳过macOS公证
           CSC_IDENTITY_AUTO_DISCOVERY: false
@@ -129,6 +131,7 @@ jobs:
           # Windows环境变量设置
           echo "ELECTRON_CACHE=$env:USERPROFILE\.cache\electron" >> $env:GITHUB_ENV
           echo "ELECTRON_BUILDER_CACHE=$env:USERPROFILE\.cache\electron-builder" >> $env:GITHUB_ENV
+          [System.Convert]::FromBase64String($env:CSC_LINK) | Set-Content -AsByteStream windows_cert.pfx
 
       # 构建应用
       - name: Build application
@@ -140,6 +143,8 @@ jobs:
           # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # 跳过macOS公证（如果没有开发者账号）
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_LINK: windows_cert.pfx
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
       # 上传构建产物
       - name: Upload build artifacts
