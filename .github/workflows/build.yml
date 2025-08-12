@@ -134,13 +134,13 @@ jobs:
           echo "ELECTRON_CACHE=$env:USERPROFILE\.cache\electron" >> $env:GITHUB_ENV
           echo "ELECTRON_BUILDER_CACHE=$env:USERPROFILE\.cache\electron-builder" >> $env:GITHUB_ENV
           # 调试输出证书前10字符
-          Write-Host "First 10 chars of CSC_LINK: $($env:CSC_LINK.Substring(0, [Math]::Min(10, $env:CSC_LINK.Length)))"
+          Write-Host "First 10 chars of CSC_LINK: $("${{ secrets.CSC_LINK }}".Substring(0, [Math]::Min(10, $env:CSC_LINK.Length)))"
           # 创建专用证书目录
           $certDir = Join-Path $env:RUNNER_TEMP "certs"
           New-Item -ItemType Directory -Path $certDir -Force | Out-Null
           $certPath = Join-Path $certDir "windows_cert.pfx"
           # 解码 pfx 文件
-          $certBytes = [System.Convert]::FromBase64String($env:CSC_LINK)
+          $certBytes = [System.Convert]::FromBase64String("${{ secrets.CSC_LINK }}")
           # 验证解码结果
           if ($certBytes.Length -eq 0) {
             throw "Decoded certificate is empty"
