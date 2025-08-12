@@ -133,11 +133,22 @@ jobs:
           # Windows环境变量设置
           echo "ELECTRON_CACHE=$env:USERPROFILE\.cache\electron" >> $env:GITHUB_ENV
           echo "ELECTRON_BUILDER_CACHE=$env:USERPROFILE\.cache\electron-builder" >> $env:GITHUB_ENV
+          # 创建专用证书目录
+          $certDir = Join-Path $env:RUNNER_TEMP "certs"
+          New-Item -ItemType Directory -Path $certDir -Force | Out-Null
+          $certPath = Join-Path $certDir "windows_cert.pfx"
           # 解码 pfx 文件
-          $certPath = Join-Path $env:RUNNER_TEMP "windows_cert.pfx"
-          [System.Convert]::FromBase64String($env:CSC_LINK) | Set-Content -AsByteStream $certPath
+          $certBytes = [System.Convert]::FromBase64String($env:CSC_LINK)
+          [System.IO.File]::WriteAllBytes($certPath, $certBytes)
+          # 验证文件
+          if (-not (Test-Path -Path $certPath -PathType Leaf)) {
+            throw "Certificate file was not created at $certPath"
+          }
+          
+          Write-Host "Certificate successfully created at $certPath"
+          Write-Host "File size: $((Get-Item $certPath).Length) bytes"
           echo "CSC_LINK=$certPath" >> $env:GITHUB_ENV
-          ls $certPath
+          ls $certDir
 
       # 构建应用
       - name: Build application
