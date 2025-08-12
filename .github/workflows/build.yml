@@ -139,6 +139,10 @@ jobs:
           $certPath = Join-Path $certDir "windows_cert.pfx"
           # 解码 pfx 文件
           $certBytes = [System.Convert]::FromBase64String($env:CSC_LINK)
+          # 验证解码结果
+          if ($certBytes.Length -eq 0) {
+            throw "Decoded certificate is empty"
+          }
           [System.IO.File]::WriteAllBytes($certPath, $certBytes)
           # 验证文件
           if (-not (Test-Path -Path $certPath -PathType Leaf)) {
