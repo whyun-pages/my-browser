@@ -133,8 +133,6 @@ jobs:
           # Windows环境变量设置
           echo "ELECTRON_CACHE=$env:USERPROFILE\.cache\electron" >> $env:GITHUB_ENV
           echo "ELECTRON_BUILDER_CACHE=$env:USERPROFILE\.cache\electron-builder" >> $env:GITHUB_ENV
-          # 调试输出证书前10字符
-          Write-Host "First 10 chars of CSC_LINK: $("${{ secrets.CSC_LINK }}".Substring(0, [Math]::Min(10, $env:CSC_LINK.Length)))"
           # 创建专用证书目录
           $certDir = Join-Path $env:RUNNER_TEMP "certs"
           New-Item -ItemType Directory -Path $certDir -Force | Out-Null
