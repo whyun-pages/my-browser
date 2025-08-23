@@ -153,7 +153,7 @@ class BrowserApp {
         
         // 启用跨域和其他功能
         webview.setAttribute('allowpopups', 'true');
-        // webview.setAttribute('disablewebsecurity', 'true');
+        webview.setAttribute('disablewebsecurity', 'true');
         webview.setAttribute('webpreferences', 'allowRunningInsecureContent');
 
         webview.addEventListener('did-attach', (event) => {

@@ -51,7 +51,7 @@ function createWindow() {
     icon: path.join(__dirname, 'assets/icon.png')
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
 
   // 设置窗口状态监听器
   setupWindowStateListener();

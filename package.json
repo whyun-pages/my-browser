@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "env-cmd -f .env electron . --enable-logging --lang=zh-CN",
+    "prebuild": "vite build",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
@@ -33,7 +34,9 @@
     "env-cmd": "^10.1.0",
     "icns-gen": "^1.1.0",
     "png-to-ico": "^2.1.8",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.2"
   },
   "build": {
     "asar": true,
@@ -131,7 +134,7 @@
       "icon": "build/icon.png",
       "category": "Development"
     },
-    "publish":[]
+    "publish": []
   },
   "dependencies": {
     "node-slogger": "^3.0.0"
