@@ -28,10 +28,6 @@ declare global {
       [CommentComponentName]: {
         text: string;
       };
-      TabComponent: {
-        id: number;
-        title: string;
-      };
     }
   }
 }
