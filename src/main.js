@@ -105,11 +105,11 @@ ipcMain.on('register-webview-handler', (event, wcId) => {
   if (wc) {
     logger.info('注册 webview 拦截新窗口:', wcId, wc);
     wc.setWindowOpenHandler((handlerDetails) => {
-      // if (handlerDetails.disposition === 'foreground-tab') {
-      //   console.log('webview 拦截新窗口:', handlerDetails);
-      //   mainWindow.webContents.send('open-new-window', handlerDetails);
-      //   return { action: 'deny' };
-      // }
+      if (handlerDetails.disposition === 'foreground-tab') {
+        console.log('webview 拦截新窗口:', handlerDetails);
+        mainWindow.webContents.send('open-new-window', handlerDetails);
+        return { action: 'deny' };
+      }
       return { action: 'allow' };
     });
   }

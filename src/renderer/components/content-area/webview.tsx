@@ -24,7 +24,10 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       
           webview.setAttribute("src", src);
           webview.setAttribute('id', `webview-${tabId}`);
-          if (preload) webview.setAttribute("preload", preload);
+                     // 设置预加载脚本路径（使用相对路径）
+           if (preload) {
+             webview.setAttribute("preload", preload);
+           }
           if (allowpopups != null) webview.setAttribute("allowpopups", String(allowpopups));
           if (disablewebsecurity != null)
             webview.setAttribute("disablewebsecurity", String(disablewebsecurity));
@@ -79,10 +82,26 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       webview.addEventListener('did-finish-load', async (e) => {
           console.log('did-finish-load');
       });
-      webview.addEventListener('did-fail-load', (event) => {
-        console.error('did-fail-load', event.errorCode, event.errorDescription, event.validatedURL);
+             webview.addEventListener('did-fail-load', (event) => {
+         console.error('did-fail-load', event.errorCode, event.errorDescription, event.validatedURL);
+         // 可以在这里添加重试逻辑或显示错误信息
+       });
+       
+       webview.addEventListener('crashed', () => {
+         console.error('webview 崩溃');
+         // 可以在这里添加重启逻辑
+       });
+       
+       webview.addEventListener('gpu-crashed', () => {
+         console.error('webview GPU 崩溃');
+       });
+       window.electronAPI.on('open-new-window', (
+        handlerDetails: Electron.HandlerDetails,
+      ) => {
+        globalModel.webviewHelper?.createNewTab(
+          handlerDetails.url, handlerDetails.referrer?.url
+        );
       });
-      
       
       return webview;
     }

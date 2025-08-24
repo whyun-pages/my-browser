@@ -13,7 +13,7 @@ export class WebviewHelper {
     tabs: Map<number, Tab> = new Map();
     activeTabId: number | undefined;
     tabCounter: number = 0;
-    private homeUrl = 'https://www.bing.com';
+    private homeUrl = 'https://cn.bing.com';
     private searchUrl = 'https://www.bing.com/search?q=';
     private tabsContainer = document.getElementById('tabs') as HTMLElement;
     private addressBar = document.getElementById('address-bar') as HTMLInputElement;
@@ -69,6 +69,7 @@ export class WebviewHelper {
         const webviewElement = webviewComponent.render();
         this.webviewContainer.appendChild(webviewElement);
         this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} />);
+        this.switchToTab(tabId);
     }
     updateTab(tabId: number, tabProps: Partial<Tab>) {
         const tab = this.tabs.get(tabId);
@@ -96,7 +97,7 @@ export class WebviewHelper {
                 titleElement.textContent = tabProps.title;
             }
         } else if (tabProps.url) {
-            webviewElement.src = tabProps.url;
+            this.updateAddressBar(tabProps.url);
         }
     }
 
@@ -185,12 +186,12 @@ export class WebviewHelper {
             activeWebview.reload();
         }
     }
-    hardReload() {
-        const activeWebview = this.activeWebviewElement;
-        if (activeWebview) {
-            activeWebview.reloadIgnoringCache();
-        }
-    }
+    // hardReload() {
+    //     const activeWebview = this.activeWebviewElement;
+    //     if (activeWebview) {
+    //         activeWebview.reloadIgnoringCache();
+    //     }
+    // }
 
     goHome() {
         this.navigate(this.homeUrl);
