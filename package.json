@@ -5,8 +5,10 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "predev": "npm run vite:build",
     "dev": "env-cmd -f .env electron . --enable-logging --lang=zh-CN",
-    "prebuild": "vite build",
+    "vite:build": "vite build",
+    "prebuild": "npm run vite:build",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
@@ -29,6 +31,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/electron": "^1.6.12",
     "electron": "^37.2.6",
     "electron-builder": "^26.0.12",
     "env-cmd": "^10.1.0",
@@ -36,7 +39,8 @@
     "png-to-ico": "^2.1.8",
     "sharp": "^0.34.3",
     "typescript": "^5.9.2",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vite-plugin-static-copy": "^3.1.2"
   },
   "build": {
     "asar": true,

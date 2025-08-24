@@ -1,4 +1,6 @@
 import { defineConfig } from "vite";
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+
 
 export default defineConfig({
   root: "src",
@@ -19,4 +21,14 @@ export default defineConfig({
     jsxInject: `import { jsx } from '@/jsx-runtime'`,
     jsxFactory: "jsx.component",
   },
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'preload.js',   // 项目里的 preload.js 文件
+          dest: ''    // 拷贝到 dist/preload.js
+        }
+      ]
+    })
+  ],
 });

@@ -1,7 +1,12 @@
 import { AbstractComponent } from "@/jsx-runtime";
 
-export class Tab extends AbstractComponent {
-    render() {
+interface TabComponentProps {
+    id: number;
+    title: string;
+}
+
+export class TabComponent extends AbstractComponent<TabComponentProps> {
+    render(): JSX.Element {
         return (
             <div class="tab" data-tab-id={this.props.id}>
                 <span class="tab-title">{this.props.title}</span>
@@ -9,4 +14,8 @@ export class Tab extends AbstractComponent {
             </div>
         )
     }
+}
+
+export function TabComponentFactory(props: TabComponentProps): JSX.Element {
+    return <TabComponent {...props} />;
 }

@@ -1,15 +1,7 @@
 export const CommentComponentName = 'comment';
 declare global {
   namespace JSX {
-    // type IntrinsicElements = Record<
-    //   keyof HTMLElementTagNameMap | keyof SVGElementTagNameMap,
-    //   Record<string, any>
-    // > & {
-    //   [CommentComponentName]: {
-    //     text: string;
-    //   };
-    //   webview: Record<string, any>;
-    // };
+
     /** JSX 表达式的返回类型（用于赋给 appendChild） */
     type Element = Node;
 
@@ -36,12 +28,16 @@ declare global {
       [CommentComponentName]: {
         text: string;
       };
+      TabComponent: {
+        id: number;
+        title: string;
+      };
     }
   }
 }
 export type BaseProps = Record<string, any>;
 export type ComponentFunction = (props: BaseProps) => any;
-export abstract class AbstractComponent<P extends BaseProps = BaseProps> {
+export abstract class AbstractComponent<P extends BaseProps = BaseProps> implements JSX.ElementClass {
   public props: P;
   public constructor(props: P) {
     this.props = props;
