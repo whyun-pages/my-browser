@@ -62,8 +62,8 @@ export class WebviewHelper {
             tabId: tabId,
             src: url,
             preload: "preload.js",
-            allowpopups: false,
-            disablewebsecurity: false,
+            allowpopups: true,
+            disablewebsecurity: true,
             webpreferences: "allowRunningInsecureContent"
         });
         const webviewElement = webviewComponent.render();

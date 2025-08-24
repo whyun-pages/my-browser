@@ -42,7 +42,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
           const wcId = webview.getWebContentsId();
           // 使用预加载脚本暴露的安全 API
           if (window.electronAPI) {
-              window.electronAPI.send('register-webview-handler', wcId);
+            window.electronAPI.send('register-webview-handler', wcId);
           }
       });
       
@@ -79,6 +79,10 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       webview.addEventListener('did-finish-load', async (e) => {
           console.log('did-finish-load');
       });
+      webview.addEventListener('did-fail-load', (event) => {
+        console.error('did-fail-load', event.errorCode, event.errorDescription, event.validatedURL);
+      });
+      
       
       return webview;
     }

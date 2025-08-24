@@ -5,10 +5,12 @@ import { Bookmarks } from "./components/bookmarks";
 import { WebviewHelper } from "./helpers/webview.helper";
 import { globalModel } from "./models/global.model";
 
-const app = document.getElementById("app");
-
-app?.append(<TabsContainer />);
-app?.append(<Toolbar />);
-app?.append(<ContentArea />);
-app?.append(<Bookmarks />);
-globalModel.webviewHelper = new WebviewHelper();
+document.addEventListener('DOMContentLoaded', () => {    
+    const app = document.getElementById("app");
+    
+    app?.append(<TabsContainer />);
+    app?.append(<Toolbar />);
+    app?.append(<ContentArea />);
+    app?.append(<Bookmarks />);
+    globalModel.webviewHelper = new WebviewHelper();
+});

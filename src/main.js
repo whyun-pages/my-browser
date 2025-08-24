@@ -43,6 +43,7 @@ function createWindow() {
     titleBarStyle: 'hidden', // 隐藏标题栏但保留窗口控制按钮（macOS 适用）
 
     webPreferences: {
+      preload: path.join(__dirname, 'main-preload.js'), // ⬅️ 关键
       webviewTag: true, // ⬅️ 必须启用
       nodeIntegration: true,
       contextIsolation: false,
@@ -104,11 +105,11 @@ ipcMain.on('register-webview-handler', (event, wcId) => {
   if (wc) {
     logger.info('注册 webview 拦截新窗口:', wcId, wc);
     wc.setWindowOpenHandler((handlerDetails) => {
-      if (handlerDetails.disposition === 'foreground-tab') {
-        console.log('webview 拦截新窗口:', handlerDetails);
-        mainWindow.webContents.send('open-new-window', handlerDetails);
-        return { action: 'deny' };
-      }
+      // if (handlerDetails.disposition === 'foreground-tab') {
+      //   console.log('webview 拦截新窗口:', handlerDetails);
+      //   mainWindow.webContents.send('open-new-window', handlerDetails);
+      //   return { action: 'deny' };
+      // }
       return { action: 'allow' };
     });
   }
