@@ -2,6 +2,9 @@ const { ipcRenderer } = require('electron');
 const validChannels = [
     'window-maximized',
     'window-unmaximized',
+    'window-minimize',
+    'window-maximize',
+    'window-close',
     'open-new-window',
     'webview-keyboard-event',
     'get-bookmarks',
@@ -19,11 +22,15 @@ window.electronAPI = {
         // 只允许特定的通道
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
+        } else {
+            console.warn(`Invalid channel: ${channel}`);
         }
     },
     on: (channel, func) => {
         if (validChannels.includes(channel)) {
             ipcRenderer.on(channel, (event, ...args) => func(...args));
+        } else {
+            console.warn(`Invalid channel: ${channel}`);
         }
     }
 };
