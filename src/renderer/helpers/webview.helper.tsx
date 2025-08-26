@@ -43,9 +43,82 @@ export class WebviewHelper {
         this.init();
     }
 
-    init() {
+    private init() {
         this.createNewTab(this.homeUrl);
+        this.globalEvent();
     }
+    private globalEvent() {
+        window.electronAPI.on('open-new-window', (
+            handlerDetails: Electron.HandlerDetails,
+        ) => {
+            this.createNewTab(
+                handlerDetails.url, handlerDetails.referrer?.url
+            );
+        });
+        document.addEventListener('keydown', (e) => {
+            this.keyboardEvent(e);
+        });
+    }
+    private preventDefaultMayBe(e: KeyboardEvent) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+    }
+    keyboardEvent(e: KeyboardEvent) {
+        // F12 - 打开/关闭开发者工具
+        if (e.key === 'F12') {
+            this.preventDefaultMayBe(e); // 阻止浏览器默认行为
+            this.openDevTools();
+        }
+        
+        // Ctrl+R 或 F5 - 刷新页面
+        if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+            this.preventDefaultMayBe(e);
+            this.refresh();
+        }
+        
+        // Ctrl+Shift+R 或 Ctrl+F5 - 强制刷新
+        if ((e.ctrlKey && e.shiftKey && e.key === 'R') || (e.ctrlKey && e.key === 'F5')) {
+            this.preventDefaultMayBe(e);
+            this.hardReload();
+        }
+        
+        // Ctrl+T - 新建标签页
+        if (e.ctrlKey && e.key === 't') {
+            this.preventDefaultMayBe(e);
+            this.createNewTab();
+        }
+        
+        // Ctrl+W - 关闭当前标签页
+        if (e.ctrlKey && e.key === 'w') {
+            this.preventDefaultMayBe(e);
+            this.closeTab();
+        }
+        
+        // Ctrl+D - 添加书签
+        // if (e.ctrlKey && e.key === 'd') {
+        //     this.preventDefaultMayBe(e);
+        //     this.addBookmark();
+        // }
+        
+        // Alt+Left - 后退
+        if (e.altKey && e.key === 'ArrowLeft') {
+            this.preventDefaultMayBe(e);
+            this.goBack();
+        }
+        
+        // Alt+Right - 前进
+        if (e.altKey && e.key === 'ArrowRight') {
+            this.preventDefaultMayBe(e);
+            this.goForward();
+        }
+        
+        // Ctrl+L - 聚焦地址栏
+        if (e.ctrlKey && e.key === 'l') {
+            this.preventDefaultMayBe(e);
+            this.focusAddressBar();
+        }
+      }
 
     createNewTab(url: string = this.homeUrl, referer?: string) {
         const tabId = this.tabCounter++;
@@ -186,15 +259,90 @@ export class WebviewHelper {
             activeWebview.reload();
         }
     }
-    // hardReload() {
-    //     const activeWebview = this.activeWebviewElement;
-    //     if (activeWebview) {
-    //         activeWebview.reloadIgnoringCache();
-    //     }
-    // }
+    hardReload() {
+        const activeWebview = this.activeWebviewElement;
+        if (activeWebview) {
+            activeWebview.reloadIgnoringCache();
+        }
+    }
 
     goHome() {
         this.navigate(this.homeUrl);
+    }
+
+    goto() {
+        this.navigate(this.addressBar.value);
+    }
+
+    openDevTools() {
+        const activeWebview = this.activeWebviewElement;
+        if (activeWebview) {
+            try {
+                // 检查 webview 是否已经加载完成
+                if (activeWebview.isLoading && activeWebview.isLoading()) {
+                    console.log('网页正在加载中，请稍后再试');
+                    return;
+                }
+                
+                // 检查开发者工具是否已经打开
+                if (activeWebview.isDevToolsOpened && activeWebview.isDevToolsOpened()) {
+                    activeWebview.closeDevTools();
+                    console.log('开发者工具已关闭');
+                } else {
+                    activeWebview.openDevTools();
+                    console.log('开发者工具已打开');
+                }
+            } catch (error) {
+                console.error('开发者工具操作失败:', error);
+                // 如果上述方法失败，尝试简单的打开方式
+                try {
+                    activeWebview.openDevTools();
+                } catch (fallbackError) {
+                    console.error('开发者工具打开失败:', fallbackError);
+                }
+            }
+        } else {
+            console.log('没有找到活动的网页标签');
+        }
+    }
+    focusAddressBar() {
+        this.addressBar.focus();
+        this.addressBar.select();
+    }
+
+    closeTab(tabId?: number) {
+        if (this.tabs.size <= 1) {
+            return; // 至少保留一个标签页
+        }
+
+        if (!tabId) {
+            tabId = this.activeTabId;
+        }
+        const tabIds = this.tabs.keys();
+       
+        // 移除DOM元素
+        this.tabElement(tabId as number)?.remove();
+        this.webviewElement(tabId as number)?.remove();
+        
+        
+        // 如果关闭的是当前活动标签页，切换到其他标签页
+        if (this.activeTabId === tabId) {
+            let previousTabId = -1;
+            for (const tabIdCurrent of tabIds) {
+                if (tabIdCurrent === tabId) {
+                    break;
+                }
+                previousTabId = tabIdCurrent;
+            }
+            if (previousTabId !== -1) {
+                this.switchToTab(previousTabId);
+            }
+        }
+        // 移除标签页数据
+        this.tabs.delete(tabId as number);
+        
+        // TODO: 重新计算标签页宽度
+        // this.adjustTabWidths();
     }
     
 }

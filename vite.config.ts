@@ -31,7 +31,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'preload.js',   // 项目里的 preload.js 文件
+          src: 'renderer/preload.js',   // 项目里的 preload.js 文件
           dest: ''    // 拷贝到 dist/preload.js
         }
       ]
