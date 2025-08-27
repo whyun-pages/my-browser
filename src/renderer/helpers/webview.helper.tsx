@@ -16,6 +16,7 @@ export class WebviewHelper {
     private homeUrl = 'https://cn.bing.com';
     private searchUrl = 'https://www.bing.com/search?q=';
     private tabsContainer = document.getElementById('tabs') as HTMLElement;
+    private tabWrapperContainer = document.querySelector('.tabs-container') as HTMLElement;
     private addressBar = document.getElementById('address-bar') as HTMLInputElement;
     private webviewContainer = document.querySelector('.content-area') as HTMLElement;
     private get tabElements() {
@@ -125,7 +126,7 @@ export class WebviewHelper {
         const tab = {
             id: tabId,
             url: url,
-            title: 'New Tab',
+            title: '新建标签页',
             canGoBack: false,
             canGoForward: false,
             referer: referer
@@ -143,6 +144,7 @@ export class WebviewHelper {
         this.webviewContainer.appendChild(webviewElement);
         this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} />);
         this.switchToTab(tabId);
+        this.adjustTabWidths();
     }
     updateTab(tabId: number, tabProps: Partial<Tab>) {
         const tab = this.tabs.get(tabId);
@@ -341,8 +343,81 @@ export class WebviewHelper {
         // 移除标签页数据
         this.tabs.delete(tabId as number);
         
-        // TODO: 重新计算标签页宽度
-        // this.adjustTabWidths();
+        // 重新计算标签页宽度
+        this.adjustTabWidths();
+    }
+    updateTabTitle(tabId: number, title: string) {
+        const tabElement = this.tabElement(tabId)?.querySelector(`.tab-title`) as HTMLElement;
+        if (tabElement) {
+            // 根据标签页数量动态调整标题长度
+            const maxLength = this.getMaxTitleLength();
+            tabElement.textContent = title.length > maxLength ? title.substring(0, maxLength) : title;
+        }
+
+        // 更新标签页数据
+        const tab = this.tabs.get(tabId);
+        if (tab) {
+            tab.title = title;
+        }
+    }
+
+    // 根据标签页数量计算最大标题长度
+    getMaxTitleLength() {
+        const tabCount = this.tabs.size;
+        if (tabCount <= 2) return 25;
+        if (tabCount <= 4) return 20;
+        if (tabCount <= 6) return 15;
+        if (tabCount <= 8) return 12;
+        return 8; // 8个以上标签页时，标题最短
+    }
+    // 动态调整标签页宽度
+    adjustTabWidths() {
+        const tabsContainer = this.tabsContainer;
+        const tabs = tabsContainer.querySelectorAll('.tab') as NodeListOf<HTMLElement>;
+        
+        if (tabs.length === 0) return;
+        
+        // 获取容器宽度
+        const containerWidth = this.tabWrapperContainer.offsetWidth;
+        const newTabBtnWidth = 40; // 新建按钮固定宽度
+        const tabCount = tabs.length;
+        
+        // 计算每个标签页的理想宽度
+        let tabWidth = Math.floor((containerWidth - newTabBtnWidth) / tabCount);
+        
+        // 设置最小宽度和最大宽度限制
+        const minWidth = 100;
+        const maxWidth = 250;
+        
+        if (tabWidth < minWidth) {
+            tabWidth = minWidth;
+        } else if (tabWidth > maxWidth) {
+            tabWidth = maxWidth;
+        }
+        
+        // 应用宽度到所有标签页
+        tabs.forEach((tab: HTMLElement) => {
+            tab.style.flexBasis = `${tabWidth}px`;
+            tab.style.minWidth = `${Math.min(tabWidth, minWidth)}px`;
+            tab.style.maxWidth = `${tabWidth}px`;
+        });
+        
+        // 计算实际需要的总宽度
+        const totalNeededWidth = (tabWidth * tabCount) + newTabBtnWidth;
+        
+        // 设置tabs容器的宽度
+        if (totalNeededWidth > containerWidth) {
+            // 需要滚动
+            tabsContainer.style.width = `${totalNeededWidth}px`;
+        } else {
+            // 占满可用空间
+            tabsContainer.style.width = '100%';
+        }
+        
+        // 更新所有标签页的标题显示
+        this.tabs.forEach(tab => {
+            this.updateTabTitle(tab.id, tab.title);
+        });
     }
     
 }
