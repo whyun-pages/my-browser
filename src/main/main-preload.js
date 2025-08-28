@@ -32,5 +32,12 @@ window.electronAPI = {
         } else {
             console.warn(`Invalid channel: ${channel}`);
         }
+    },
+    invoke: async (channel, ...args) => {
+        if (validChannels.includes(channel)) {
+            return await ipcRenderer.invoke(channel, ...args);
+        } else {
+            console.warn(`Invalid channel: ${channel}`);
+        }
     }
 };

@@ -1,6 +1,7 @@
 import { AbstractComponent } from "@/jsx-runtime";
 import { BookmarkItem } from "./bookmark-item";
 import type { BookmarkItemProps } from "./bookmark-item";
+import { globalModel } from "@/renderer/models/global.model";
 export interface BookmarksSidebarProps {
     bookmarks: BookmarkItemProps[];
 }
@@ -10,7 +11,7 @@ export class BookmarksSidebar<T extends BookmarksSidebarProps> extends AbstractC
             <div id="bookmarks-sidebar" class="bookmarks-sidebar hidden">
             <div class="sidebar-header">
                 <h3>收藏夹</h3>
-                <button id="close-sidebar" class="close-btn">×</button>
+                <button id="close-sidebar" class="close-btn" onClick={() => globalModel.bookmarkHelper?.hide()}>×</button>
             </div>
             <div id="bookmarks-list" class="bookmarks-list">
                 {this.props.bookmarks.length > 0 ? this.props.bookmarks.map((bookmark) => (

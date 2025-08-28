@@ -1,5 +1,6 @@
 import { WebviewComponent } from '../components/content-area/webview';
 import { TabComponent } from '../components/tabs-container/tab';
+import { globalModel } from '../models/global.model';
 
 export interface Tab {
     id: number;
@@ -19,6 +20,7 @@ export class WebviewHelper {
     private tabWrapperContainer = document.querySelector('.tabs-container') as HTMLElement;
     private addressBar = document.getElementById('address-bar') as HTMLInputElement;
     private webviewContainer = document.querySelector('.content-area') as HTMLElement;
+    private bookmarkSvg = document.getElementById('bookmark-btn')?.querySelector('svg') as SVGElement;
     private get tabElements() {
         return document.querySelectorAll('.tab');
     }
@@ -97,10 +99,10 @@ export class WebviewHelper {
         }
         
         // Ctrl+D - 添加书签
-        // if (e.ctrlKey && e.key === 'd') {
-        //     this.preventDefaultMayBe(e);
-        //     this.addBookmark();
-        // }
+        if (e.ctrlKey && e.key === 'd') {
+            this.preventDefaultMayBe(e);
+            this.addBookmark();
+        }
         
         // Alt+Left - 后退
         if (e.altKey && e.key === 'ArrowLeft') {
@@ -205,6 +207,11 @@ export class WebviewHelper {
     }
     updateAddressBar(url: string) {
         this.addressBar.value = url;
+        if (globalModel.bookmarkHelper?.isBookmarked(url)) {
+            this.bookmarkSvg.setAttribute('fill', 'currentColor');
+        } else {
+            this.bookmarkSvg.setAttribute('fill', 'none');
+        }
     }
 
     updateNavigationButtons() {
@@ -274,6 +281,15 @@ export class WebviewHelper {
 
     goto() {
         this.navigate(this.addressBar.value);
+    }
+    addBookmark() {
+        const activeWebview = this.activeWebviewElement;
+        if (activeWebview) {
+            globalModel.bookmarkHelper?.add({
+                url: activeWebview.src,
+                title: activeWebview.getTitle()
+            });
+        }
     }
 
     openDevTools() {

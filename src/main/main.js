@@ -8,30 +8,7 @@ const logger = new Slogger();
  * @type {BrowserWindow}
  */
 let mainWindow;
-let bookmarks = [];
-const bookmarksPath = path.join(__dirname, 'bookmarks.json');
 
-// 加载书签
-function loadBookmarks() {
-  try {
-    if (fs.existsSync(bookmarksPath)) {
-      const data = fs.readFileSync(bookmarksPath, 'utf8');
-      bookmarks = JSON.parse(data);
-    }
-  } catch (error) {
-    console.error('加载书签失败:', error);
-    bookmarks = [];
-  }
-}
-
-// 保存书签
-function saveBookmarks() {
-  try {
-    fs.writeFileSync(bookmarksPath, JSON.stringify(bookmarks, null, 2));
-  } catch (error) {
-    console.error('保存书签失败:', error);
-  }
-}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -52,7 +29,7 @@ function createWindow() {
     icon: path.join(__dirname, 'assets/icon.png')
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
+  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
 
   // 设置窗口状态监听器
   setupWindowStateListener();
@@ -89,7 +66,7 @@ function createWindow() {
 
 // 应用程序准备就绪时创建窗口
 app.whenReady().then(() => {
-  loadBookmarks();
+  // loadBookmarks();
   createWindow();
 
   app.on('activate', () => {
@@ -122,27 +99,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-// IPC 处理程序
-ipcMain.handle('get-bookmarks', () => {
-  return bookmarks;
-});
 
-ipcMain.handle('add-bookmark', (event, bookmark) => {
-  bookmarks.push({
-    id: Date.now(),
-    title: bookmark.title,
-    url: bookmark.url,
-    createdAt: new Date().toISOString()
-  });
-  saveBookmarks();
-  return bookmarks;
-});
-
-ipcMain.handle('remove-bookmark', (event, id) => {
-  bookmarks = bookmarks.filter(bookmark => bookmark.id !== id);
-  saveBookmarks();
-  return bookmarks;
-});
 
 // 窗口控制 IPC 处理器
 ipcMain.on('window-minimize', () => {
@@ -182,3 +139,4 @@ ipcMain.on('window-close', () => {
 
 // 禁用默认菜单
 Menu.setApplicationMenu(null); 
+require('./ipcs');

@@ -2,7 +2,7 @@
   "name": "my-browser",
   "version": "1.0.1",
   "description": "基于 Electron 开发的浏览器",
-  "main": "src/main.js",
+  "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
     "predev": "npm run vite:build",
