@@ -89,19 +89,7 @@ export class ActionButtons extends AbstractComponent {
                         onclick={() => this.toggleDebug()}>
                             <span>调试</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <comment text="Bug 头部" />
-                                <ellipse cx="12" cy="8" rx="4" ry="3" />
-                                <comment text="Bug 身体" />
-                                <ellipse cx="12" cy="16" rx="3" ry="5" />
-                                <comment text="Bug 眼睛" />
-                                <circle cx="10.5" cy="7.5" r="0.5" fill="currentColor" />
-                                <circle cx="13.5" cy="7.5" r="0.5" fill="currentColor" />
-                                <comment text="Bug 触角" />
-                                <path d="M9 5l-2-3M15 5l2-3" />
-                                <comment text="Bug 腿部" />
-                                <path d="M6 10l-3 1M18 10l3 1" />
-                                <path d="M6 15l-3 0M18 15l3 0" />
-                                <path d="M6 19l-3-1M18 19l3-1" />
+                                <path d="M9 18l6-6-6-6" />
                             </svg>
                             <div class="submenu hidden">
                                 <div class="submenu-item" id="open-devtools" onClick={() => this.openDevTools()}>打开开发者工具</div>
