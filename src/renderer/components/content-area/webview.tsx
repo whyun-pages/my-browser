@@ -10,7 +10,14 @@ interface WebviewProps {
   webpreferences?: string;
 }
 export class WebviewComponent extends AbstractComponent<WebviewProps> {
-  
+  private version: string;
+  private userAgent: string;
+  public constructor(props: WebviewProps) {
+    super(props);
+    const urlParams = new URLSearchParams(window.location.search)
+    this.version = urlParams.get('version') || '';
+    this.userAgent = navigator.userAgent + ' mybrowser/' + this.version;
+  }
 
   render() {
     const {
@@ -26,6 +33,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
 
     webview.setAttribute("src", src);
     webview.setAttribute('id', `webview-${tabId}`);
+    webview.setAttribute('useragent', this.userAgent);
     // 设置预加载脚本路径（使用相对路径）
     if (preload) {
       webview.setAttribute("preload", preload);
