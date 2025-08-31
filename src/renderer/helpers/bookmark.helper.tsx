@@ -2,7 +2,7 @@ import { BookmarkItem, type BookmarkItemBaseProps, type BookmarkItemProps } from
 import { BookmarksSidebar } from "../components/bookmarks/bookmarks-sidebar";
 
 export class BookmarkHelper {
-    private bookmarkUrls: Set<string> = new Set();
+    private bookmarkUrl2IdMap: Map<string, number> = new Map();
     public constructor() {
         this.init();
     }
@@ -13,7 +13,7 @@ export class BookmarkHelper {
         window.electronAPI.invoke<BookmarkItemProps[]>('get-bookmarks').then((bookmarks: BookmarkItemProps[]) => {
             document.body.append(<BookmarksSidebar bookmarks={bookmarks} />);
             bookmarks.forEach(bookmark => {
-                this.bookmarkUrls.add(bookmark.url);
+                this.bookmarkUrl2IdMap.set(bookmark.url, bookmark.id);
             });
         }).catch(error => {
             console.error('加载书签失败', error);
@@ -33,7 +33,7 @@ export class BookmarkHelper {
             this.bookmarksSidebar?.append(
                 <BookmarkItem url={bookmark.url} title={bookmark.title} id={bookmark.id} />
             );
-            this.bookmarkUrls.add(bookmark.url);
+            this.bookmarkUrl2IdMap.set(bookmark.url, bookmark.id);
         })
         .catch(error => {
             console.error('添加书签失败', error);
@@ -47,9 +47,12 @@ export class BookmarkHelper {
         if (bookmarkItem) {
             bookmarkItem.remove();
         }
-        this.bookmarkUrls.delete(url);
+        this.bookmarkUrl2IdMap.delete(url);
     }
     public isBookmarked(url: string) {
-        return this.bookmarkUrls.has(url);
+        return this.bookmarkUrl2IdMap.has(url);
+    }
+    public getBookmarkId(url: string) {
+        return this.bookmarkUrl2IdMap.get(url);
     }
 }

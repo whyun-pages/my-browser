@@ -205,13 +205,34 @@ export class WebviewHelper {
             }, 100);
         }
     }
-    updateAddressBar(url: string) {
-        this.addressBar.value = url;
+    toggleBookmarkUrl(url: string) {
         if (globalModel.bookmarkHelper?.isBookmarked(url)) {
             this.bookmarkSvg.setAttribute('fill', 'currentColor');
         } else {
             this.bookmarkSvg.setAttribute('fill', 'none');
         }
+    }
+    toggleBookmark() {
+        const activeWebview = this.activeWebviewElement;
+        if (activeWebview) {
+            if (globalModel.bookmarkHelper?.isBookmarked(activeWebview.src)) {
+                globalModel.bookmarkHelper?.remove(
+                    globalModel.bookmarkHelper?.getBookmarkId(activeWebview.src) as number,
+                    activeWebview.src,
+                );
+                this.bookmarkSvg.setAttribute('fill', 'none');
+            } else {
+                globalModel.bookmarkHelper?.add({
+                    url: activeWebview.src,
+                    title: activeWebview.getTitle()
+                });
+                this.bookmarkSvg.setAttribute('fill', 'currentColor');
+            }
+        }
+    }
+    updateAddressBar(url: string) {
+        this.addressBar.value = url;
+        this.toggleBookmarkUrl(url);
     }
 
     updateNavigationButtons() {
@@ -289,6 +310,7 @@ export class WebviewHelper {
                 url: activeWebview.src,
                 title: activeWebview.getTitle()
             });
+            this.bookmarkSvg.setAttribute('fill', 'currentColor');
         }
     }
 
