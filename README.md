@@ -104,6 +104,7 @@ MIT License
 - [ ] 展示loading 图标  
 - [ ] tab 标签显示favicon  
 - [ ] 新建标签页使用默认模板进行渲染  
+- [ ] 主题切换功能
 - [x] 焦点在 webview 上时，快捷键失效问题  
 
 ## 已知问题
