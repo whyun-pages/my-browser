@@ -91,28 +91,21 @@ pnpm build
 ## 技术栈
 
 - **Electron** - 桌面应用框架
-- **Node.js** - 运行时环境
-- **HTML/CSS/JavaScript** - 前端技术
-- **Webview** - 网页渲染组件
-
-## 开发说明
-
-项目使用现代化的 ES6+ 语法和模块化架构：
-
-- `main.js` - 负责应用生命周期管理和主进程逻辑
-- `renderer.js` - 负责界面交互和浏览器功能实现
-- `styles.css` - 包含响应式设计和现代化样式
-- IPC 通信 - 主进程与渲染进程间的书签数据交换
+- **Vite** - 前端构建工具
+- **TypeScript** - 编程语言
+- **JSX** - 前端模板语言
 
 ## 许可证
 
 MIT License 
 
 ## TODO
-[ ] 展示loading 图标
-[ ] tab 标签显示favicon
-[ ] 新建标签页使用默认模板进行渲染
-[ ] 焦点在 webview 上时，快捷键失效问题
+
+- [ ] 展示loading 图标  
+- [ ] tab 标签显示favicon  
+- [ ] 新建标签页使用默认模板进行渲染  
+- [ ] 主题切换功能
+- [x] 焦点在 webview 上时，快捷键失效问题  
 
 ## 已知问题
 1. Windows下加载网页缓慢

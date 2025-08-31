@@ -121,7 +121,7 @@ body {
     min-width: 180px;
     z-index: 1001;
     border: 1px solid #e1e5e9;
-    overflow: hidden;
+    overflow: visible; /* 改为visible，让左侧子菜单可以显示 */
 }
 
 .menu-item {
@@ -156,14 +156,14 @@ body {
 .submenu {
     position: absolute;
     top: 0;
-    left: 100%;
+    right: 100%; /* 改为右侧定位，在父菜单左侧显示 */
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     min-width: 160px;
     border: 1px solid #e1e5e9;
     overflow: hidden;
-    margin-left: 4px;
+    margin-right: 4px; /* 改为右侧边距 */
 }
 
 .submenu-item {
@@ -188,7 +188,7 @@ body {
 }
 
 .submenu:not(.hidden) {
-    animation: fadeInRight 0.2s ease-out;
+    animation: fadeInLeft 0.2s ease-out;
 }
 
 @keyframes fadeInDown {
@@ -206,6 +206,17 @@ body {
     from {
         opacity: 0;
         transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
     }
     to {
         opacity: 1;
