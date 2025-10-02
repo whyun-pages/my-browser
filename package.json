@@ -14,6 +14,7 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "pack": "electron-builder --dir",
+    "predist": "npm run vite:build",
     "dist": "electron-builder --publish=never",
     "dist:local": "env-cmd -f .env electron-builder --publish=never",
     "release": "electron-builder --publish=always",
