@@ -1,0 +1,236 @@
+/*
+ * 侧栏布局：左侧一整列放标签页和收藏夹，底部是设置；右侧上方一行工具栏，下面是页面。
+ *
+ *   .rail | .top (.toolbar .drag .window-controls)
+ *   .rail | .content-area
+ *   [设置] | .content-area
+ */
+[data-layout="rail"] .only-classic {
+    display: none !important;
+}
+[data-layout="rail"] #app {
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    grid-template-rows: 46px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "rail top"
+        "rail page"
+        "foot page";
+    background: var(--c-chrome);
+}
+
+/* 侧栏和它底部的设置区用侧栏自己的颜色：把部件认的别名改指过来 */
+[data-layout="rail"] .rail,
+[data-layout="rail"] .settings-container {
+    --ink: var(--rail-ink);
+    --muted: var(--rail-muted);
+    --hover: var(--rail-hover);
+    --line: var(--rail-line);
+    --focus: var(--c-mark);
+    background: var(--rail-bg);
+    color: var(--rail-ink);
+}
+[data-layout="rail"] .rail {
+    grid-area: rail;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 8px 8px 0;
+}
+[data-layout="rail"] .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 30px;
+    padding: 0 7px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+[data-layout="rail"] .brand-logo {
+    flex: none;
+    width: 22px;
+    height: 22px;
+}
+[data-layout="rail"] .rail-label,
+[data-layout="rail"] .sidebar-header h3 {
+    padding: 12px 9px 5px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* 标签页竖排；标签很多时自己滚动，最多占侧栏一半多一点，给收藏夹留位置 */
+[data-layout="rail"] #tabs {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 34px;
+    max-height: 55%;
+    overflow-y: auto;
+}
+[data-layout="rail"] .tab,
+[data-layout="rail"] #new-tab-btn {
+    flex: none;
+    height: 34px;
+    gap: 10px;
+    padding: 0 6px 0 10px;
+    border-radius: 8px;
+}
+[data-layout="rail"] .tab.active {
+    background: var(--rail-hi);
+    color: #fff;
+}
+/* 当前标签页：左边一道柠檬黄 */
+[data-layout="rail"] .tab.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--c-mark);
+}
+[data-layout="rail"] #new-tab-btn {
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+    text-align: left;
+}
+[data-layout="rail"] #new-tab-btn .ic {
+    flex: none;
+    width: 16px;
+    height: 16px;
+}
+
+/* 收藏夹：侧栏里常驻的一段，open 类在这里不起作用 */
+[data-layout="rail"] #bookmarks-sidebar {
+    flex: 1;
+    min-height: 72px;
+}
+[data-layout="rail"] .bookmark-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    padding: 0 4px 0 10px;
+    color: var(--muted);
+}
+[data-layout="rail"] .bookmark-item:hover .bookmark-info {
+    color: var(--ink);
+}
+[data-layout="rail"] .bookmark-url {
+    display: none;
+}
+[data-layout="rail"] .bookmarks-empty {
+    padding: 4px 10px;
+}
+
+/* 设置区：侧栏底部 */
+[data-layout="rail"] .settings-container {
+    grid-area: foot;
+    gap: 2px;
+    padding: 6px 8px 8px;
+    border-top: 1px solid var(--line);
+}
+[data-layout="rail"] .settings-btn {
+    flex: 1;
+    width: auto;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 10px;
+    border-radius: 8px;
+}
+[data-layout="rail"] .settings-btn .ic {
+    flex: none;
+    width: 16px;
+    height: 16px;
+}
+[data-layout="rail"] #rail-fold-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+}
+[data-layout="rail"] #rail-fold-btn .ic {
+    width: 16px;
+    height: 16px;
+}
+[data-layout="rail"] .settings-panel {
+    left: 8px;
+    bottom: calc(100% + 4px);
+}
+
+/* 顶栏：整行可以拖动窗口，里面的按钮和输入框除外 */
+[data-layout="rail"] .top {
+    grid-area: top;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    background: var(--c-bar);
+    border-bottom: 1px solid var(--line);
+    -webkit-app-region: drag;
+}
+[data-layout="rail"] .toolbar {
+    flex: 1;
+    gap: 2px;
+    padding-left: 8px;
+}
+[data-layout="rail"] .nav-buttons {
+    gap: 2px;
+}
+[data-layout="rail"] .nav-buttons,
+[data-layout="rail"] .address-bar-container {
+    -webkit-app-region: no-drag;
+}
+[data-layout="rail"] .address-bar-container {
+    margin: 0 8px 0 6px;
+}
+[data-layout="rail"] .drag {
+    flex: 0 0 20px;
+    align-self: stretch;
+}
+
+[data-layout="rail"] .content-area {
+    grid-area: page;
+}
+/* 加载进度：工具栏下方一段来回滑动的柠檬黄 */
+[data-layout="rail"] #app.loading .load-progress {
+    display: block;
+    grid-area: page;
+    align-self: start;
+    height: 2px;
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--c-mark), transparent) no-repeat 0 0 / 40% 100%;
+    animation: load-slide 1.1s linear infinite;
+}
+@keyframes load-slide {
+    from { background-position: -70% 0; }
+    to { background-position: 170% 0; }
+}
+
+/* 收起：只剩图标，靠悬停提示看标题 */
+[data-layout="rail"][data-rail="slim"] :is(.brand-name, .rail-label, .tab-title, .tab-close, .new-tab-label,
+    .sidebar-header, .bookmark-title, .bookmark-remove, .bookmarks-empty, .settings-label) {
+    display: none;
+}
+[data-layout="rail"][data-rail="slim"] :is(.brand, .tab, #new-tab-btn, .bookmark-info, .settings-btn) {
+    justify-content: center;
+    padding: 0;
+}
+[data-layout="rail"][data-rail="slim"] #new-tab-btn {
+    margin-bottom: 10px;
+}
+[data-layout="rail"][data-rail="slim"] .settings-container {
+    flex-direction: column;
+}
+[data-layout="rail"][data-rail="slim"] :is(.settings-btn, #rail-fold-btn) {
+    flex: none;
+    width: 100%;
+}

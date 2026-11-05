@@ -1,6 +1,8 @@
 import { WebviewComponent } from '../components/content-area/webview';
 import { TabComponent } from '../components/tabs-container/tab';
 import { globalModel } from '../models/global.model';
+import { settings } from '../models/settings.model';
+import { isSameSite, paintFavicon, siteColor } from './site-color';
 
 export interface Tab {
     id: number;
@@ -9,6 +11,11 @@ export interface Tab {
     canGoBack?: boolean;
     canGoForward?: boolean;
     referer?: string;
+    /** 创建时是否放行跨域。网页视图创建后无法更改，所以这个值不会再变 */
+    crossOrigin: boolean;
+    /** 网页提供的图标地址 */
+    favicon?: string;
+    loading?: boolean;
 }
 export class WebviewHelper {
     tabs: Map<number, Tab> = new Map();
@@ -17,10 +24,12 @@ export class WebviewHelper {
     private homeUrl = 'https://cn.bing.com';
     private searchUrl = 'https://www.bing.com/search?q=';
     private tabsContainer = document.getElementById('tabs') as HTMLElement;
-    private tabWrapperContainer = document.querySelector('.tabs-container') as HTMLElement;
     private addressBar = document.getElementById('address-bar') as HTMLInputElement;
     private webviewContainer = document.querySelector('.content-area') as HTMLElement;
-    private bookmarkSvg = document.getElementById('bookmark-btn')?.querySelector('svg') as SVGElement;
+    private bookmarkButton = document.getElementById('bookmark-btn') as HTMLButtonElement;
+    private corsChip = document.getElementById('cors-chip') as HTMLElement;
+    private corsChipText = document.getElementById('cors-chip-text') as HTMLElement;
+    private app = document.getElementById('app') as HTMLElement;
     private get tabElements() {
         return document.querySelectorAll('.tab');
     }
@@ -123,28 +132,28 @@ export class WebviewHelper {
 
     createNewTab(url: string = this.homeUrl, referer?: string) {
         const tabId = this.tabCounter++;
-        const tab = {
+        const tab: Tab = {
             id: tabId,
             url: url,
             title: '新建标签页',
             canGoBack: false,
             canGoForward: false,
-            referer: referer
+            referer: referer,
+            // “允许跨域”只在创建标签页时读取一次：改开关不影响已打开的标签页
+            crossOrigin: settings.allowCrossOrigin,
         }
         this.tabs.set(tabId, tab);
         const webviewComponent = new WebviewComponent({
             tabId: tabId,
             src: url,
             preload: "preload.js",
-            allowpopups: true,
-            disablewebsecurity: true,
-            webpreferences: "allowRunningInsecureContent"
+            allowCrossOrigin: tab.crossOrigin,
         });
         const webviewElement = webviewComponent.render();
         this.webviewContainer.appendChild(webviewElement);
         this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} />);
+        this.paintTabFavicon(tabId);
         this.switchToTab(tabId);
-        this.adjustTabWidths();
     }
     updateTab(tabId: number, tabProps: Partial<Tab>) {
         const tab = this.tabs.get(tabId);
@@ -152,18 +161,14 @@ export class WebviewHelper {
             console.warn(`Tab ${tabId} not found`);
             return;
         }
-        this.tabs.set(tabId, {
-            ...tab,
-            ...tabProps
-        });
+        // 跳到另一个站点后，旧站点的图标作废，等新页面上报自己的图标
+        if (tabProps.url && !isSameSite(tabProps.url, tab.url)) {
+            tab.favicon = undefined;
+        }
+        Object.assign(tab, tabProps);
         const tabElement = this.tabElement(tabId);
         if (!tabElement) {
             console.warn(`Tab element ${tabId} not found`);
-            return;
-        }
-        const webviewElement = this.webviewElement(tabId);
-        if (!webviewElement) {
-            console.warn(`Webview element ${tabId} not found`);
             return;
         }
         if (tabProps.title) {
@@ -171,9 +176,32 @@ export class WebviewHelper {
             if (titleElement) {
                 titleElement.textContent = tabProps.title;
             }
-        } else if (tabProps.url && tabId === this.activeTabId) {
+            // 标题过长或侧栏收起时，靠悬停提示看全名
+            tabElement.setAttribute('title', tabProps.title);
+        }
+        if (tabProps.url && tabId === this.activeTabId) {
             // 后台标签页的跳转不能改写当前地址栏
             this.updateAddressBar(tabProps.url);
+        }
+        this.paintTabFavicon(tabId);
+    }
+    setTabLoading(tabId: number, loading: boolean) {
+        const tab = this.tabs.get(tabId);
+        if (!tab) {
+            return;
+        }
+        tab.loading = loading;
+        this.paintTabFavicon(tabId);
+        if (tabId === this.activeTabId) {
+            this.app.classList.toggle('loading', loading);
+        }
+    }
+    // 标签上的站点图标：加载中转圈，其次是网页自己的图标，最后是彩色圆点
+    private paintTabFavicon(tabId: number) {
+        const tab = this.tabs.get(tabId);
+        const favicon = this.tabElement(tabId)?.querySelector('.fav') as HTMLElement | null;
+        if (tab && favicon) {
+            paintFavicon(favicon, tab);
         }
     }
 
@@ -197,6 +225,7 @@ export class WebviewHelper {
             if (tab) {
                 this.updateAddressBar(tab.url);
             }
+            this.app.classList.toggle('loading', !!tab?.loading);
             
             // 延迟更新导航按钮，确保 webview 已经准备就绪
             setTimeout(() => {
@@ -204,12 +233,26 @@ export class WebviewHelper {
             }, 100);
         }
     }
-    toggleBookmarkUrl(url: string) {
-        if (globalModel.bookmarkHelper?.isBookmarked(url)) {
-            this.bookmarkSvg.setAttribute('fill', 'currentColor');
-        } else {
-            this.bookmarkSvg.setAttribute('fill', 'none');
-        }
+    // 星标的选中状态用类名表示（按钮里的图标是固定的，不能替换）
+    private setBookmarked(bookmarked: boolean) {
+        const label = bookmarked ? '取消收藏' : '收藏这个页面';
+        this.bookmarkButton.classList.toggle('on', bookmarked);
+        this.bookmarkButton.title = label;
+        this.bookmarkButton.setAttribute('aria-label', label);
+    }
+    // 按当前标签页的地址重新判断星标状态
+    refreshBookmarkState() {
+        const tab = this.tabs.get(this.activeTabId as number);
+        this.setBookmarked(!!tab && !!globalModel.bookmarkHelper?.isBookmarked(tab.url));
+    }
+    // 地址栏里的标记：显示当前标签页创建时是否放行了跨域
+    private updateCorsChip() {
+        const allowed = !!this.tabs.get(this.activeTabId as number)?.crossOrigin;
+        this.corsChip.classList.toggle('off', !allowed);
+        this.corsChipText.textContent = allowed ? '跨域已放行' : '未放行跨域';
+        this.corsChip.title = allowed
+            ? '同源策略已关闭：这个页面可以读取其他源的响应'
+            : '这个标签页遵守同源策略。在设置里打开“允许跨域”后，新开的标签页才会放行';
     }
     toggleBookmark() {
         const activeWebview = this.activeWebviewElement;
@@ -219,34 +262,38 @@ export class WebviewHelper {
                     globalModel.bookmarkHelper?.getBookmarkId(activeWebview.src) as number,
                     activeWebview.src,
                 );
-                this.bookmarkSvg.setAttribute('fill', 'none');
+                this.setBookmarked(false);
             } else {
                 globalModel.bookmarkHelper?.add({
                     url: activeWebview.src,
                     title: activeWebview.getTitle()
                 });
-                this.bookmarkSvg.setAttribute('fill', 'currentColor');
+                this.setBookmarked(true);
             }
         }
     }
     updateAddressBar(url: string) {
         this.addressBar.value = url;
-        this.toggleBookmarkUrl(url);
+        this.setBookmarked(!!globalModel.bookmarkHelper?.isBookmarked(url));
+        this.updateCorsChip();
+        // 界面的强调色跟着当前站点走
+        document.documentElement.style.setProperty('--hue', siteColor(url));
     }
 
     updateNavigationButtons() {
         const activeWebview = this.activeWebviewElement;
-        if (activeWebview
-            && typeof activeWebview.canGoBack === 'function'
-            && typeof activeWebview.canGoForward === 'function'
-        ) {
-            this.backButton.disabled = !activeWebview.canGoBack();
-            this.forwardButton.disabled = !activeWebview.canGoForward();
-        } else {
-            // 如果 webview 还没有完全初始化，禁用导航按钮
-            this.backButton.disabled = true;
-            this.forwardButton.disabled = true;
+        let canGoBack = false;
+        let canGoForward = false;
+        try {
+            if (activeWebview) {
+                canGoBack = activeWebview.canGoBack();
+                canGoForward = activeWebview.canGoForward();
+            }
+        } catch {
+            // 网页视图还没准备好（dom-ready 之前）时这两个方法会抛异常，此时两个按钮都禁用
         }
+        this.backButton.disabled = !canGoBack;
+        this.forwardButton.disabled = !canGoForward;
     }
     // 把地址栏输入转换为可访问的 URL
     private resolveInput(input: string) {
@@ -322,7 +369,7 @@ export class WebviewHelper {
                 url: activeWebview.src,
                 title: activeWebview.getTitle()
             });
-            this.bookmarkSvg.setAttribute('fill', 'currentColor');
+            this.setBookmarked(true);
         }
     }
 
@@ -385,82 +432,5 @@ export class WebviewHelper {
                 this.switchToTab(nextTabId);
             }
         }
-
-        // 重新计算标签页宽度
-        this.adjustTabWidths();
     }
-    updateTabTitle(tabId: number, title: string) {
-        const tabElement = this.tabElement(tabId)?.querySelector(`.tab-title`) as HTMLElement;
-        if (tabElement) {
-            // 根据标签页数量动态调整标题长度
-            const maxLength = this.getMaxTitleLength();
-            tabElement.textContent = title.length > maxLength ? title.substring(0, maxLength) : title;
-        }
-
-        // 更新标签页数据
-        const tab = this.tabs.get(tabId);
-        if (tab) {
-            tab.title = title;
-        }
-    }
-
-    // 根据标签页数量计算最大标题长度
-    getMaxTitleLength() {
-        const tabCount = this.tabs.size;
-        if (tabCount <= 2) return 25;
-        if (tabCount <= 4) return 20;
-        if (tabCount <= 6) return 15;
-        if (tabCount <= 8) return 12;
-        return 8; // 8个以上标签页时，标题最短
-    }
-    // 动态调整标签页宽度
-    adjustTabWidths() {
-        const tabsContainer = this.tabsContainer;
-        const tabs = tabsContainer.querySelectorAll('.tab') as NodeListOf<HTMLElement>;
-        
-        if (tabs.length === 0) return;
-        
-        // 获取容器宽度
-        const containerWidth = this.tabWrapperContainer.offsetWidth;
-        const newTabBtnWidth = 40; // 新建按钮固定宽度
-        const tabCount = tabs.length;
-        
-        // 计算每个标签页的理想宽度
-        let tabWidth = Math.floor((containerWidth - newTabBtnWidth) / tabCount);
-        
-        // 设置最小宽度和最大宽度限制
-        const minWidth = 100;
-        const maxWidth = 250;
-        
-        if (tabWidth < minWidth) {
-            tabWidth = minWidth;
-        } else if (tabWidth > maxWidth) {
-            tabWidth = maxWidth;
-        }
-        
-        // 应用宽度到所有标签页
-        tabs.forEach((tab: HTMLElement) => {
-            tab.style.flexBasis = `${tabWidth}px`;
-            tab.style.minWidth = `${Math.min(tabWidth, minWidth)}px`;
-            tab.style.maxWidth = `${tabWidth}px`;
-        });
-        
-        // 计算实际需要的总宽度
-        const totalNeededWidth = (tabWidth * tabCount) + newTabBtnWidth;
-        
-        // 设置tabs容器的宽度
-        if (totalNeededWidth > containerWidth) {
-            // 需要滚动
-            tabsContainer.style.width = `${totalNeededWidth}px`;
-        } else {
-            // 占满可用空间
-            tabsContainer.style.width = '100%';
-        }
-        
-        // 更新所有标签页的标题显示
-        this.tabs.forEach(tab => {
-            this.updateTabTitle(tab.id, tab.title);
-        });
-    }
-    
 }

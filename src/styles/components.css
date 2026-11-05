@@ -1,0 +1,505 @@
+/*
+ * 两种布局共用的部件。这里只写一遍，颜色全部取自变量；
+ * 摆在哪里、横排还是竖排，由 layout-classic.css / layout-rail.css 决定。
+ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+}
+body {
+    overflow: hidden;
+    font: 13px/1.2 var(--font-ui);
+    background: var(--c-chrome);
+    color: var(--c-ink);
+    -webkit-font-smoothing: antialiased;
+}
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+input {
+    font: inherit;
+    color: inherit;
+}
+ul {
+    list-style: none;
+}
+svg {
+    display: block;
+}
+.hidden {
+    display: none !important;
+}
+/* 切换布局的那一帧关掉过渡，见 settings.model.ts */
+.no-transition, .no-transition * {
+    transition: none !important;
+}
+
+/*
+ * 部件只认 --ink / --muted / --line / --hover / --focus 这几个别名。
+ * 默认指向当前色板；侧栏内部会把它们改指向侧栏的颜色（见 layout-rail.css），
+ * 设置面板再指回来，所以面板即使放在深色侧栏里也保持自己的配色。
+ */
+#app, .settings-panel {
+    --ink: var(--c-ink);
+    --muted: var(--c-muted);
+    --line: var(--c-line);
+    --hover: var(--c-hover);
+    --focus: var(--c-focus);
+}
+#app {
+    position: relative;
+    height: 100vh;
+    display: grid;
+    overflow: hidden;
+}
+
+.ic {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+
+/* 图标按钮 */
+.icon-btn {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+}
+.icon-btn:hover {
+    background: var(--hover);
+    color: var(--ink);
+}
+.icon-btn:disabled {
+    opacity: .4;
+    cursor: default;
+    background: none;
+    color: var(--muted);
+}
+
+/* 标签页（横排或竖排由布局决定） */
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    color: var(--muted);
+}
+.tab:hover {
+    background: var(--hover);
+    color: var(--ink);
+}
+.tab-title {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tab-close {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+}
+.tab-close .ic {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2;
+}
+.tab:hover .tab-close, .tab.active .tab-close, .tab-close:focus-visible {
+    opacity: .7;
+}
+.tab .tab-close:hover {
+    opacity: 1;
+    background: var(--hover);
+}
+.new-tab-btn {
+    color: var(--muted);
+}
+.new-tab-btn:hover {
+    background: var(--hover);
+    color: var(--ink);
+}
+
+/* 站点图标：网页自己的图标，取不到时是带首字的彩色圆点，加载中是转圈 */
+.fav {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--hue);
+    color: var(--fg);
+    font: 600 10px/16px "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    text-align: center;
+}
+.fav.has-img {
+    background: none;
+    border-radius: 3px;
+}
+.fav img {
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+.fav.spin {
+    background: none;
+    border: 2px solid color-mix(in srgb, var(--hue) 28%, transparent);
+    border-top-color: var(--hue);
+    animation: spin .7s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(1turn); }
+}
+
+/* 工具栏 */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+.nav-buttons {
+    display: flex;
+    gap: 4px;
+}
+.address-bar-container {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    height: 32px;
+    margin: 0 6px;
+    padding: 0 3px;
+    background: var(--c-field);
+    border: 1px solid var(--c-field-border);
+    border-radius: 8px;
+}
+.address-bar-container:focus-within {
+    background: var(--c-field-focus);
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent);
+}
+/* 普通浏览器放小锁的位置：当前标签页是否放行跨域 */
+.cors-chip {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 24px;
+    padding: 0 8px 0 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    background: var(--c-chip);
+    cursor: default;
+}
+.cors-chip .ic {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.9;
+}
+.cors-chip .cors-off-icon, .cors-chip.off .cors-on-icon {
+    display: none;
+}
+.cors-chip.off {
+    background: var(--hover);
+    color: var(--muted);
+}
+.cors-chip.off .cors-off-icon {
+    display: block;
+}
+#address-bar {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 9px;
+    background: none;
+    border: 0;
+    outline: 0;
+    font-family: var(--font-addr);
+    font-size: var(--addr-size);
+}
+#address-bar::placeholder {
+    color: var(--muted);
+    font-family: var(--font-ui);
+}
+.star-btn {
+    width: 26px;
+    height: 26px;
+}
+.star-btn.on {
+    color: var(--c-star);
+}
+.star-btn.on .ic {
+    fill: currentColor;
+}
+
+/* 窗口拖动区和窗口控制按钮 */
+.drag, .brand {
+    -webkit-app-region: drag;
+}
+.window-controls {
+    display: flex;
+    align-self: stretch;
+    -webkit-app-region: no-drag;
+}
+.window-control-btn {
+    width: 46px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+}
+.window-control-btn:hover {
+    background: var(--hover);
+    color: var(--ink);
+}
+.window-control-btn.close:hover {
+    background: #E81123;
+    color: #fff;
+}
+.window-control-btn svg {
+    pointer-events: none;
+}
+
+/* 设置按钮和设置面板 */
+.settings-container {
+    position: relative;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    -webkit-app-region: no-drag;
+}
+/* 面板打开时接住“点外面关闭”：网页内部的点击传不到外壳 */
+.backdrop {
+    position: fixed;
+    inset: 0;
+    -webkit-app-region: no-drag;
+}
+.settings-panel {
+    position: absolute;
+    width: 268px;
+    padding: 6px;
+    background: var(--c-surface);
+    color: var(--c-ink);
+    border: 1px solid var(--c-line);
+    border-radius: 10px;
+    box-shadow: 0 14px 36px var(--c-shadow);
+    cursor: default;
+}
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 38px;
+    padding: 4px 8px;
+}
+.setting-name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.setting-name small {
+    font-size: 11.5px;
+    color: var(--muted);
+}
+.segmented {
+    display: flex;
+    padding: 2px;
+    border-radius: 7px;
+    background: var(--hover);
+}
+.segmented button {
+    height: 24px;
+    padding: 0 13px;
+    border-radius: 5px;
+    color: var(--muted);
+}
+.segmented button[aria-checked="true"] {
+    background: var(--c-surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+}
+.switch {
+    position: relative;
+    flex: none;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--muted) 45%, transparent);
+    transition: background .15s;
+}
+.switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+    transition: transform .15s;
+}
+.switch[aria-checked="true"] {
+    background: var(--focus);
+}
+.switch[aria-checked="true"]::after {
+    transform: translateX(16px);
+}
+.menu-sep {
+    height: 1px;
+    margin: 5px 4px;
+    background: var(--line);
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+    text-align: left;
+}
+.menu-item:hover {
+    background: var(--hover);
+}
+.menu-item .ic {
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+}
+.menu-item kbd {
+    margin-left: auto;
+    font: inherit;
+    font-size: 11.5px;
+    color: var(--muted);
+}
+
+/* 收藏夹（抽屉还是侧栏里的一段，由布局决定） */
+.bookmarks-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.bookmarks-list {
+    min-height: 0;
+    overflow-y: auto;
+}
+.bookmark-item {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+}
+.bookmark-item:hover {
+    background: var(--hover);
+}
+.bookmark-info {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+.bookmark-title, .bookmark-url {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.bookmark-remove {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    opacity: 0;
+}
+.bookmark-remove .ic {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2;
+}
+.bookmark-item:hover .bookmark-remove, .bookmark-remove:focus-visible {
+    opacity: 1;
+}
+.bookmark-remove:hover {
+    background: var(--hover);
+    color: var(--ink);
+}
+.bookmarks-empty {
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+/* 内容区域：切换布局时这里永远不动，否则网页会被重新加载 */
+.content-area {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    background: #fff;
+}
+webview {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: none;
+}
+webview.active {
+    display: flex;
+}
+.load-progress {
+    display: none;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--muted, #888) 45%, transparent);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--muted, #888) 70%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}

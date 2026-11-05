@@ -1,0 +1,90 @@
+/*
+ * 色板和字体。两种布局 × 浅色/暗黑，共四组，数值来自 design/ 下的设计稿。
+ * --hue 是当前站点的颜色，由 WebviewHelper 写到 <html> 的行内样式上。
+ */
+
+/* 经典布局：标签栏在上，素净的灰白外壳，强调色跟随当前站点 */
+:root[data-layout="classic"] {
+    --c-chrome: #ECEEF3;
+    --c-bar: #FFFFFF;
+    --c-surface: #FFFFFF;
+    --c-field: #F1F3F7;
+    --c-field-focus: #FFFFFF;
+    --c-field-border: transparent;
+    --c-ink: #1D2433;
+    --c-muted: #667085;
+    --c-line: #D5DAE3;
+    --c-hover: rgba(29, 36, 51, .07);
+    --c-focus: var(--hue, #2FA4DC);
+    --c-chip: color-mix(in srgb, var(--hue, #2FA4DC) 17%, transparent);
+    --c-star: #DFA200;
+    --c-shadow: rgba(15, 20, 30, .16);
+    --font-ui: Bahnschrift, "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    --font-addr: var(--font-ui);
+    --addr-size: 14px;
+}
+:root[data-layout="classic"].dark-theme {
+    --c-chrome: #14171D;
+    --c-bar: #21252E;
+    --c-surface: #21252E;
+    --c-field: #161920;
+    --c-field-focus: #21252E;
+    --c-ink: #E9ECF3;
+    --c-muted: #9AA4B5;
+    --c-line: #343A47;
+    --c-hover: rgba(255, 255, 255, .08);
+    --c-shadow: rgba(0, 0, 0, .5);
+}
+
+/* 侧栏布局：深紫色侧栏 + 柠檬黄标记 */
+:root[data-layout="rail"] {
+    --c-chrome: #F5F4FA;
+    --c-bar: #F5F4FA;
+    --c-surface: #FFFFFF;
+    --c-field: #FFFFFF;
+    --c-field-focus: #FFFFFF;
+    --c-field-border: #DEDBEB;
+    --c-ink: #1E1B33;
+    --c-muted: #6A6785;
+    --c-line: #DEDBEB;
+    --c-hover: rgba(30, 27, 51, .07);
+    --c-focus: #6C5FD0;
+    --c-mark: #F7CF2F;
+    --c-chip: color-mix(in srgb, var(--c-mark) 38%, transparent);
+    --c-star: #D99A00;
+    --c-shadow: rgba(12, 9, 34, .28);
+    --rail-bg: #2A2450;
+    --rail-hi: #3D3674;
+    --rail-ink: #F1EEFB;
+    --rail-muted: #B3ADD6;
+    --rail-hover: rgba(255, 255, 255, .08);
+    --rail-line: rgba(255, 255, 255, .1);
+    --rail-w: 240px;
+    --font-ui: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    /* 开发时要看清端口和路径，地址用等宽字体 */
+    --font-addr: "Cascadia Mono", Consolas, monospace;
+    --addr-size: 13px;
+}
+:root[data-layout="rail"].dark-theme {
+    --c-chrome: #1F1C36;
+    --c-bar: #1F1C36;
+    --c-surface: #2A2648;
+    --c-field: #15122A;
+    --c-field-focus: #15122A;
+    --c-field-border: #37325A;
+    --c-ink: #ECEAF7;
+    --c-muted: #A6A1C6;
+    --c-line: #37325A;
+    --c-hover: rgba(255, 255, 255, .08);
+    --c-focus: #F7CF2F;
+    --c-chip: color-mix(in srgb, var(--c-mark) 22%, transparent);
+    --c-star: #F7CF2F;
+    --c-shadow: rgba(0, 0, 0, .55);
+    --rail-bg: #16132C;
+    --rail-hi: #2C2757;
+    --rail-muted: #9D97C4;
+}
+/* 侧栏收起成只剩图标的窄条 */
+:root[data-layout="rail"][data-rail="slim"] {
+    --rail-w: 52px;
+}

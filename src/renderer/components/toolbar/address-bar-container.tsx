@@ -1,20 +1,32 @@
 import { AbstractComponent } from "@/jsx-runtime";
 import { globalModel } from "../../models/global.model";
+import { IconLock, IconStar, IconSwap } from "../icons";
 
 export class AddressBarContainer extends AbstractComponent {
     render() {
         return (
             <div class="address-bar-container">
-                <input type="url" id="address-bar" placeholder="输入网址或搜索内容..." onkeypress={
+                {/* 普通浏览器放小锁的位置：显示当前标签页是否放行跨域，文字和样式由 WebviewHelper 更新 */}
+                <span id="cors-chip" class="cors-chip">
+                    <IconSwap class="cors-on-icon" />
+                    <IconLock class="cors-off-icon" />
+                    <span id="cors-chip-text"></span>
+                </span>
+                <input type="text" id="address-bar" spellcheck="false" autocomplete="off"
+                    placeholder="输入网址或搜索内容" aria-label="地址栏" onkeydown={
                     (e: KeyboardEvent) => {
                         if (e.key === 'Enter') {
-                            globalModel.webviewHelper?.navigate(
-                                (document.getElementById('address-bar') as HTMLInputElement).value
-                            );
+                            const input = e.target as HTMLInputElement;
+                            globalModel.webviewHelper?.navigate(input.value);
+                            input.blur();
                         }
                     }
                 } />
+                <button id="bookmark-btn" class="icon-btn star-btn" title="收藏这个页面" aria-label="收藏这个页面"
+                    onclick={() => globalModel.webviewHelper?.toggleBookmark()}>
+                    <IconStar />
+                </button>
             </div>
         )
     }
-} 
+}
