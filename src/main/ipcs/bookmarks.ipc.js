@@ -1,9 +1,10 @@
-const { ipcMain } = require('electron');
+const { app, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 let bookmarks = [];
-const bookmarksPath = path.join(__dirname, 'bookmarks.json');
+// 打包后 __dirname 位于只读的 app.asar 内，书签必须保存到用户数据目录
+const bookmarksPath = path.join(app.getPath('userData'), 'bookmarks.json');
 
 // 加载书签
 function loadBookmarks() {
@@ -20,6 +21,7 @@ function loadBookmarks() {
 // 保存书签
 function saveBookmarks() {
   try {
+    fs.mkdirSync(path.dirname(bookmarksPath), { recursive: true });
     fs.writeFileSync(bookmarksPath, JSON.stringify(bookmarks, null, 2));
   } catch (error) {
     console.error('保存书签失败:', error);

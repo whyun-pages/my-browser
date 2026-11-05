@@ -1,15 +1,53 @@
-import { AbstractComponent } from "@/jsx-runtime";
+import { AbstractComponent, type BaseProps } from "@/jsx-runtime";
 import { globalModel } from "@/renderer/models/global.model";
 
+const DARK_THEME_CLASS = 'dark-theme';
+const THEME_STORAGE_KEY = 'theme';
+
 export class ActionButtons extends AbstractComponent {
+    constructor(props: BaseProps) {
+        super(props);
+        this.initTheme();
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', (e) => {
+            if (!(e.target as Element | null)?.closest?.('.settings-container')) {
+                this.hideAllMenus();
+            }
+        });
+    }
+    private get isDarkTheme() {
+        return document.documentElement.classList.contains(DARK_THEME_CLASS);
+    }
+    // 菜单项显示的是点击后将切换到的主题
+    private get themeMenuText() {
+        return this.isDarkTheme ? '浅色主题' : '暗黑主题';
+    }
+    private initTheme() {
+        // 没有保存过主题设置时，跟随系统偏好
+        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const useDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
+        document.documentElement.classList.toggle(DARK_THEME_CLASS, useDark);
+    }
+    toggleTheme() {
+        const useDark = !this.isDarkTheme;
+        document.documentElement.classList.toggle(DARK_THEME_CLASS, useDark);
+        localStorage.setItem(THEME_STORAGE_KEY, useDark ? 'dark' : 'light');
+        const themeMenuText = document.querySelector('#theme-menu span');
+        if (themeMenuText) {
+            themeMenuText.textContent = this.themeMenuText;
+        }
+        this.hideAllMenus();
+    }
+    hideAllMenus() {
+        this.hideSettings();
+        this.hideDebug();
+    }
     private get settingsMenu() {
         return document.getElementById('settings-menu') as HTMLElement;
     }
     private get debugMenu() {
         return document.getElementById('debug-menu') as HTMLElement;
-    }
-    private get aboutMenu() {
-        return document.getElementById('about-menu') as HTMLElement;
     }
     showSettings() {
         this.settingsMenu.classList.remove('hidden');
@@ -30,8 +68,9 @@ export class ActionButtons extends AbstractComponent {
         this.debugMenu.querySelector('.submenu')?.classList.remove('hidden');
     }
     showAbout() {
-        this.aboutMenu.classList.remove('hidden');
-        this.hideSettings();
+        this.hideAllMenus();
+        const version = new URLSearchParams(window.location.search).get('version') || '';
+        alert(`My Browser v${version}\n基于 Electron 开发的浏览器\n\n功能特性：\n• 多标签页浏览\n• 智能地址栏\n• 书签管理\n• 自动跨域支持\n• 开发者工具`);
     }
     hideDebug() {
         this.debugMenu.querySelector('.submenu')?.classList.add('hidden');
@@ -73,8 +112,8 @@ export class ActionButtons extends AbstractComponent {
                         </svg>
                     </button>
                     <div id="settings-menu" class="settings-menu hidden">
-                        <div class="menu-item" id="theme-menu">
-                            <span>主题</span>
+                        <div class="menu-item" id="theme-menu" onclick={() => this.toggleTheme()}>
+                            <span>{this.themeMenuText}</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 18l6-6-6-6" />
                             </svg>
@@ -97,7 +136,7 @@ export class ActionButtons extends AbstractComponent {
                                 <div class="submenu-item" id="hard-reload" onClick={() => this.hardReload()}>强制刷新</div>
                             </div>
                         </div>
-                        <div class="menu-item" id="about-menu">
+                        <div class="menu-item" id="about-menu" onclick={() => this.showAbout()}>
                             <span>关于</span>
                         </div>
                     </div>

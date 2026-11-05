@@ -9,7 +9,7 @@ const validChannels = [
     'webview-keyboard-event',
     'get-bookmarks',
     'add-bookmark',
-    'delete-bookmark',
+    'remove-bookmark',
     'update-bookmark',
     'get-history',
     'add-history',

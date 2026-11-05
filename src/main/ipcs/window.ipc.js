@@ -9,6 +9,22 @@ class WindowIPC {
     }
     resetRpcOptions(rpcInitOptions) {
         this.rpcInitOptions = rpcInitOptions;
+        // 窗口被重建（macOS activate）后，需要给新窗口重新绑定状态监听
+        this._bindWindowEvent();
+    }
+    // 监听窗口状态变化
+    _bindWindowEvent() {
+        const win = this.mainWindow;
+        if (!win) {
+            return;
+        }
+        win.on('maximize', () => {
+            win.webContents.send('window-maximized');
+        });
+
+        win.on('unmaximize', () => {
+            win.webContents.send('window-unmaximized');
+        });
     }
     _addEvent() {
         // 窗口控制 IPC 处理器
@@ -28,18 +44,7 @@ class WindowIPC {
             }
         });
 
-        // 监听窗口状态变化
-
-        if (this.mainWindow) {
-            this.mainWindow.on('maximize', () => {
-                this.mainWindow.webContents.send('window-maximized');
-            });
-
-            this.mainWindow.on('unmaximize', () => {
-                this.mainWindow.webContents.send('window-unmaximized');
-            });
-        }
-
+        this._bindWindowEvent();
 
         ipcMain.on('window-close', () => {
             if (this.mainWindow) {

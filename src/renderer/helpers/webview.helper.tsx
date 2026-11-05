@@ -35,9 +35,7 @@ export class WebviewHelper {
     }
     private backButton = document.getElementById('back-btn') as HTMLButtonElement;
     private forwardButton = document.getElementById('forward-btn') as HTMLButtonElement;
-    private get activeTabElement() {
-        return this.tabElement(this.activeTabId as number);
-    }
+    private isMac = /Mac/i.test(navigator.platform);
     private get activeWebviewElement(): Electron.WebviewTag | undefined {
         return this.webviewElement(this.activeTabId as number);
     }
@@ -68,60 +66,60 @@ export class WebviewHelper {
         }
     }
     keyboardEvent(e: KeyboardEvent) {
-        // F12 - 打开/关闭开发者工具
-        if (e.key === 'F12') {
+        const action = this.shortcutAction(e);
+        if (action) {
             this.preventDefaultMayBe(e); // 阻止浏览器默认行为
-            this.openDevTools();
+            action();
         }
-        
-        // Ctrl+R 或 F5 - 刷新页面
-        if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
-            this.preventDefaultMayBe(e);
-            this.refresh();
+    }
+    // 把按键映射为浏览器操作，每个按键最多命中一个操作（macOS 下修饰键为 Cmd）。
+    // 需与 renderer/preload.js 中的 isAppShortcut 保持一致
+    private shortcutAction(e: KeyboardEvent): (() => void) | undefined {
+        const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        const mod = (this.isMac ? e.metaKey : e.ctrlKey) && !e.altKey;
+
+        // F12 - 打开/关闭开发者工具
+        if (key === 'F12') {
+            return () => this.openDevTools();
         }
-        
-        // Ctrl+Shift+R 或 Ctrl+F5 - 强制刷新
-        if ((e.ctrlKey && e.shiftKey && e.key === 'R') || (e.ctrlKey && e.key === 'F5')) {
-            this.preventDefaultMayBe(e);
-            this.hardReload();
+        // F5 - 刷新页面，Ctrl+F5 - 强制刷新
+        if (key === 'F5') {
+            return mod ? () => this.hardReload() : () => this.refresh();
         }
-        
-        // Ctrl+T - 新建标签页
-        if (e.ctrlKey && e.key === 't') {
-            this.preventDefaultMayBe(e);
-            this.createNewTab();
+        // Ctrl+R - 刷新页面，Ctrl+Shift+R - 强制刷新
+        if (mod && key === 'r') {
+            return e.shiftKey ? () => this.hardReload() : () => this.refresh();
         }
-        
-        // Ctrl+W - 关闭当前标签页
-        if (e.ctrlKey && e.key === 'w') {
-            this.preventDefaultMayBe(e);
-            this.closeTab();
+        if (mod && !e.shiftKey) {
+            switch (key) {
+                case 't': // 新建标签页
+                    return () => this.createNewTab();
+                case 'w': // 关闭当前标签页
+                    return () => this.closeTab();
+                case 'd': // 添加书签
+                    return () => this.addBookmark();
+                case 'l': // 聚焦地址栏
+                    return () => this.focusAddressBar();
+            }
         }
-        
-        // Ctrl+D - 添加书签
-        if (e.ctrlKey && e.key === 'd') {
-            this.preventDefaultMayBe(e);
-            this.addBookmark();
+        // 后退/前进：macOS 为 Cmd+[ / Cmd+]，其他平台为 Alt+← / Alt+→
+        if (this.isMac) {
+            if (mod && key === '[') {
+                return () => this.goBack();
+            }
+            if (mod && key === ']') {
+                return () => this.goForward();
+            }
+        } else if (e.altKey && !e.ctrlKey) {
+            if (key === 'ArrowLeft') {
+                return () => this.goBack();
+            }
+            if (key === 'ArrowRight') {
+                return () => this.goForward();
+            }
         }
-        
-        // Alt+Left - 后退
-        if (e.altKey && e.key === 'ArrowLeft') {
-            this.preventDefaultMayBe(e);
-            this.goBack();
-        }
-        
-        // Alt+Right - 前进
-        if (e.altKey && e.key === 'ArrowRight') {
-            this.preventDefaultMayBe(e);
-            this.goForward();
-        }
-        
-        // Ctrl+L - 聚焦地址栏
-        if (e.ctrlKey && e.key === 'l') {
-            this.preventDefaultMayBe(e);
-            this.focusAddressBar();
-        }
-      }
+        return undefined;
+    }
 
     createNewTab(url: string = this.homeUrl, referer?: string) {
         const tabId = this.tabCounter++;
@@ -173,7 +171,8 @@ export class WebviewHelper {
             if (titleElement) {
                 titleElement.textContent = tabProps.title;
             }
-        } else if (tabProps.url) {
+        } else if (tabProps.url && tabId === this.activeTabId) {
+            // 后台标签页的跳转不能改写当前地址栏
             this.updateAddressBar(tabProps.url);
         }
     }
@@ -249,21 +248,33 @@ export class WebviewHelper {
             this.forwardButton.disabled = true;
         }
     }
-    navigate(input: string) {
-        if (!input.trim()) return;
-        
-        let url = input.trim();
-        
-        // 检查是否是完整的URL
-        if (!url.match(/^https?:\/\//)) {
-            // 检查是否看起来像域名
-            if (url.includes('.') && !url.includes(' ')) {
-                url = 'https://' + url;
-            } else {
-                // 否则作为搜索查询
-                url = `${this.searchUrl}${encodeURIComponent(url)}`;
+    // 把地址栏输入转换为可访问的 URL
+    private resolveInput(input: string) {
+        // 已带协议（http、https、file 等）或 about: 页面，原样访问
+        if (/^[a-z][a-z\d+.-]*:\/\//i.test(input) || /^about:/i.test(input)) {
+            return input;
+        }
+        if (!/\s/.test(input)) {
+            const hostname = input.split(/[/?#]/)[0].replace(/:\d+$/, '');
+            // 本机和 IP 地址默认走 http（本地开发服务一般没有证书）
+            if (hostname === 'localhost'
+                || hostname === '[::1]'
+                || /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)
+            ) {
+                return 'http://' + input;
+            }
+            // 看起来像域名
+            if (hostname.includes('.')) {
+                return 'https://' + input;
             }
         }
+        // 否则作为搜索查询
+        return `${this.searchUrl}${encodeURIComponent(input)}`;
+    }
+    navigate(input: string) {
+        if (!input.trim()) return;
+
+        const url = this.resolveInput(input.trim());
         const activeWebview = this.activeWebviewElement;
         if (activeWebview) {
             activeWebview.src = url;
@@ -305,7 +316,8 @@ export class WebviewHelper {
     }
     addBookmark() {
         const activeWebview = this.activeWebviewElement;
-        if (activeWebview) {
+        // 已收藏的页面不重复添加
+        if (activeWebview && !globalModel.bookmarkHelper?.isBookmarked(activeWebview.src)) {
             globalModel.bookmarkHelper?.add({
                 url: activeWebview.src,
                 title: activeWebview.getTitle()
@@ -350,37 +362,30 @@ export class WebviewHelper {
         this.addressBar.select();
     }
 
-    closeTab(tabId?: number) {
+    // 不传 tabId 时关闭当前活动标签页（注意第一个标签页的 id 是 0）
+    closeTab(tabId: number | undefined = this.activeTabId) {
+        if (tabId === undefined || !this.tabs.has(tabId)) {
+            return;
+        }
         if (this.tabs.size <= 1) {
             return; // 至少保留一个标签页
         }
+        const tabIds = [...this.tabs.keys()];
+        const index = tabIds.indexOf(tabId);
 
-        if (!tabId) {
-            tabId = this.activeTabId;
-        }
-        const tabIds = this.tabs.keys();
-       
-        // 移除DOM元素
-        this.tabElement(tabId as number)?.remove();
-        this.webviewElement(tabId as number)?.remove();
-        
-        
-        // 如果关闭的是当前活动标签页，切换到其他标签页
+        // 移除DOM元素和标签页数据
+        this.tabElement(tabId)?.remove();
+        this.webviewElement(tabId)?.remove();
+        this.tabs.delete(tabId);
+
+        // 如果关闭的是当前活动标签页，优先切换到左侧标签页，最左侧被关闭时切换到右侧
         if (this.activeTabId === tabId) {
-            let previousTabId = -1;
-            for (const tabIdCurrent of tabIds) {
-                if (tabIdCurrent === tabId) {
-                    break;
-                }
-                previousTabId = tabIdCurrent;
-            }
-            if (previousTabId !== -1) {
-                this.switchToTab(previousTabId);
+            const nextTabId = index > 0 ? tabIds[index - 1] : tabIds[index + 1];
+            if (nextTabId !== undefined) {
+                this.switchToTab(nextTabId);
             }
         }
-        // 移除标签页数据
-        this.tabs.delete(tabId as number);
-        
+
         // 重新计算标签页宽度
         this.adjustTabWidths();
     }

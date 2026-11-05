@@ -10,6 +10,11 @@ const logger = new Slogger();
  */
 let mainWindow;
 
+// 窗口图标：打包后由 extraResources 拷贝到 resources 目录，
+// 开发时使用 pnpm icons 生成的 build/icon.png
+const iconPath = app.isPackaged
+  ? path.join(process.resourcesPath, 'icon.png')
+  : path.join(__dirname, '../../build/icon.png');
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -27,10 +32,10 @@ function createWindow() {
       contextIsolation: false,
       webSecurity: false // 允许跨域
     },
-    icon: path.join(__dirname, 'assets/icon.png')
+    icon: iconPath
   });
   const indexFile = path.join(__dirname, '../dist/index.html');
-  mainWindow.loadURL(`file://${indexFile}?version=${version}`);
+  mainWindow.loadFile(indexFile, { query: { version } });
 
   // // 设置窗口状态监听器
   // setupWindowStateListener();

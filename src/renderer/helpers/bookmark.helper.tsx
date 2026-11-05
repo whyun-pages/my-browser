@@ -1,5 +1,5 @@
 import { BookmarkItem, type BookmarkItemBaseProps, type BookmarkItemProps } from "../components/bookmarks/bookmark-item";
-import { BookmarksSidebar } from "../components/bookmarks/bookmarks-sidebar";
+import { BookmarksEmpty, BookmarksSidebar } from "../components/bookmarks/bookmarks-sidebar";
 
 export class BookmarkHelper {
     private bookmarkUrl2IdMap: Map<string, number> = new Map();
@@ -8,6 +8,9 @@ export class BookmarkHelper {
     }
     private get bookmarksSidebar(): HTMLElement | undefined {
         return document.getElementById('bookmarks-sidebar') as HTMLElement | undefined;
+    }
+    private get bookmarksList(): HTMLElement | undefined {
+        return document.getElementById('bookmarks-list') as HTMLElement | undefined;
     }
     private init() {
         window.electronAPI.invoke<BookmarkItemProps[]>('get-bookmarks').then((bookmarks: BookmarkItemProps[]) => {
@@ -30,7 +33,8 @@ export class BookmarkHelper {
     public add(bookmark: BookmarkItemBaseProps) {
         window.electronAPI.invoke<BookmarkItemProps>('add-bookmark', bookmark)
         .then((bookmark: BookmarkItemProps) => {
-            this.bookmarksSidebar?.append(
+            this.bookmarksList?.querySelector('.bookmarks-empty')?.remove();
+            this.bookmarksList?.append(
                 <BookmarkItem url={bookmark.url} title={bookmark.title} id={bookmark.id} />
             );
             this.bookmarkUrl2IdMap.set(bookmark.url, bookmark.id);
@@ -46,6 +50,10 @@ export class BookmarkHelper {
         const bookmarkItem = this.bookmarksSidebar?.querySelector(`[data-id="${id}"]`);
         if (bookmarkItem) {
             bookmarkItem.remove();
+        }
+        const bookmarksList = this.bookmarksList;
+        if (bookmarksList && !bookmarksList.querySelector('.bookmark-item')) {
+            bookmarksList.append(<BookmarksEmpty />);
         }
         this.bookmarkUrl2IdMap.delete(url);
     }

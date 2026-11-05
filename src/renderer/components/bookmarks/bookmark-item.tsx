@@ -10,7 +10,7 @@ export interface BookmarkItemProps extends BookmarkItemBaseProps {
 export class BookmarkItem<T extends BookmarkItemProps> extends AbstractComponent<T> {
     render() {
         return (
-            <div class="bookmark-item" data-id="{this.props.id}">
+            <div class="bookmark-item" data-id={this.props.id}>
                 <div class="bookmark-info" onClick={
                     () => globalModel.webviewHelper?.createNewTab(this.props.url)
                 }>

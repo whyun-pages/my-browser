@@ -72,6 +72,10 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     });
 
     webview.addEventListener('did-navigate-in-page', (e) => {
+      // iframe 内的页内跳转不影响标签页地址
+      if (!e.isMainFrame) {
+        return;
+      }
       // this.updateTabTitle(tab.id, '加载中...');
       console.log('did-navigate-in-page');
       globalModel.webviewHelper?.updateTab(this.props.tabId, {
@@ -94,7 +98,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     webview.addEventListener('did-stop-loading', () => {
       globalModel.webviewHelper?.updateNavigationButtons();
     });
-    webview.addEventListener('did-finish-load', async (e) => {
+    webview.addEventListener('did-finish-load', () => {
       console.log('did-finish-load');
     });
     webview.addEventListener('did-fail-load', (event) => {
