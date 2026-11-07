@@ -1,2 +1,6 @@
-onlyBuiltDependencies:
-  - electron
+# 依赖的安装脚本一律不执行：esbuild 和 sharp 使用各自的预编译二进制包，
+# electron-winstaller 仅 Squirrel 打包目标需要（本项目未使用）
+allowBuilds:
+  electron-winstaller: false
+  esbuild: false
+  sharp: false

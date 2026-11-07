@@ -1,0 +1,146 @@
+/*
+ * 经典布局：第一行标签栏（右侧是拖动区和窗口按钮），第二行工具栏，下面是页面。
+ *
+ *   #tabs | #new-tab-btn | .drag | .window-controls
+ *   .toolbar ............................ [设置]
+ *   .content-area
+ *
+ * .rail 和 .top 这两个容器在这里不产生盒子，它们的子元素直接排进 #app 的网格。
+ */
+[data-layout="classic"] .only-rail {
+    display: none !important;
+}
+[data-layout="classic"] #app {
+    grid-template-columns: minmax(0, auto) auto minmax(28px, 1fr) auto;
+    grid-template-rows: 40px 48px minmax(0, 1fr);
+    background: var(--c-chrome);
+}
+[data-layout="classic"] .rail,
+[data-layout="classic"] .top {
+    display: contents;
+}
+
+/* 标签栏 */
+[data-layout="classic"] #tabs {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 0;
+    padding-left: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+[data-layout="classic"] #tabs::-webkit-scrollbar {
+    display: none;
+}
+[data-layout="classic"] .tab {
+    flex: 0 1 212px;
+    min-width: 64px;
+    height: 34px;
+    padding: 0 6px 0 10px;
+    border-radius: 8px 8px 0 0;
+}
+/* 当前标签页和工具栏同色，连成一体 */
+[data-layout="classic"] .tab.active {
+    background: var(--c-bar);
+    color: var(--ink);
+}
+[data-layout="classic"] #new-tab-btn {
+    grid-area: 1 / 2;
+    align-self: end;
+    width: 30px;
+    height: 30px;
+    margin: 0 0 2px 4px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+}
+[data-layout="classic"] .new-tab-label {
+    display: none;
+}
+[data-layout="classic"] .drag {
+    grid-area: 1 / 3;
+}
+[data-layout="classic"] .window-controls {
+    grid-area: 1 / 4;
+}
+
+/* 工具栏占满第二行，右端留出设置按钮的位置 */
+[data-layout="classic"] .toolbar {
+    grid-area: 2 / 1 / 3 / -1;
+    padding: 0 50px 0 10px;
+    background: var(--c-bar);
+    border-bottom: 1px solid var(--line);
+}
+[data-layout="classic"] .settings-container {
+    grid-area: 2 / 1 / 3 / -1;
+    justify-self: end;
+    margin-right: 10px;
+}
+[data-layout="classic"] .settings-panel {
+    right: 0;
+    top: 38px;
+}
+
+[data-layout="classic"] .content-area {
+    grid-area: 3 / 1 / 4 / -1;
+}
+
+/* 收藏夹：右侧抽屉，加上 open 类才滑出来 */
+[data-layout="classic"] #bookmarks-sidebar {
+    position: absolute;
+    top: 88px;
+    right: 0;
+    bottom: 0;
+    width: 324px;
+    z-index: 30;
+    background: var(--c-surface);
+    border-left: 1px solid var(--line);
+    box-shadow: -14px 0 36px rgba(15, 20, 30, .1);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform .22s ease, visibility 0s .22s;
+}
+[data-layout="classic"] #bookmarks-sidebar.open {
+    transform: none;
+    visibility: visible;
+    transition: transform .22s ease;
+}
+[data-layout="classic"] .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 8px 0 16px;
+    border-bottom: 1px solid var(--line);
+}
+[data-layout="classic"] .sidebar-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+[data-layout="classic"] .bookmarks-list {
+    padding: 8px;
+}
+[data-layout="classic"] .bookmark-info {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: center;
+    padding: 8px 4px 8px 10px;
+}
+[data-layout="classic"] .bookmark-info .fav {
+    grid-row: 1 / 3;
+}
+[data-layout="classic"] .bookmark-title {
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+[data-layout="classic"] .bookmark-url {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--muted);
+}
+[data-layout="classic"] .bookmarks-empty {
+    padding: 20px 12px;
+}

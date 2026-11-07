@@ -5,9 +5,11 @@ interface WebviewProps {
   tabId: number;
   src: string;
   preload?: string;
-  allowpopups?: boolean;
-  disablewebsecurity?: boolean;
-  webpreferences?: string;
+  /**
+   * 是否关闭同源策略。这类设置在网页视图创建时就确定了，之后改属性不会生效，
+   * 所以一个标签页的跨域状态从创建起就固定不变。
+   */
+  allowCrossOrigin: boolean;
 }
 export class WebviewComponent extends AbstractComponent<WebviewProps> {
   private version: string;
@@ -20,14 +22,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
   }
 
   render() {
-    const {
-      tabId,
-      src,
-      preload,
-      allowpopups,
-      disablewebsecurity,
-      webpreferences,
-    } = this.props;
+    const { tabId, src, preload, allowCrossOrigin } = this.props;
 
     const webview = document.createElement("webview") as Electron.WebviewTag;
 
@@ -38,14 +33,11 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     if (preload) {
       webview.setAttribute("preload", preload);
     }
-    if (allowpopups != null) {
-      webview.setAttribute("allowpopups", String(allowpopups));
-    }
-    if (disablewebsecurity != null) {
-      webview.setAttribute("disablewebsecurity", String(disablewebsecurity));
-    }
-    if (webpreferences) {
-      webview.setAttribute("webpreferences", webpreferences);
+    // 下面这些都是“有这个属性就生效”的开关：写成 ="false" 也算开启，不需要时必须整个不写
+    webview.setAttribute("allowpopups", "");
+    if (allowCrossOrigin) {
+      webview.setAttribute("disablewebsecurity", "");
+      webview.setAttribute("webpreferences", "allowRunningInsecureContent");
     }
 
     // 事件：Electron 的 webview 用 'did-attach'
@@ -60,7 +52,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       const wcId = webview.getWebContentsId();
       // 使用预加载脚本暴露的安全 API
       if (window.electronAPI) {
-        window.electronAPI.send('register-webview-handler', wcId);
+        window.electronAPI.send('register-webview-handler', { wcId, allowCrossOrigin });
       }
     });
 
@@ -72,7 +64,10 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     });
 
     webview.addEventListener('did-navigate-in-page', (e) => {
-      // this.updateTabTitle(tab.id, '加载中...');
+      // iframe 内的页内跳转不影响标签页地址
+      if (!e.isMainFrame) {
+        return;
+      }
       console.log('did-navigate-in-page');
       globalModel.webviewHelper?.updateTab(this.props.tabId, {
         url: e.url,
@@ -87,14 +82,21 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       });
     });
 
+    webview.addEventListener('page-favicon-updated', (e) => {
+      globalModel.webviewHelper?.updateTab(this.props.tabId, {
+        favicon: e.favicons[0],
+      });
+    });
+
     webview.addEventListener('did-start-loading', () => {
-      // 
+      globalModel.webviewHelper?.setTabLoading(this.props.tabId, true);
     });
 
     webview.addEventListener('did-stop-loading', () => {
+      globalModel.webviewHelper?.setTabLoading(this.props.tabId, false);
       globalModel.webviewHelper?.updateNavigationButtons();
     });
-    webview.addEventListener('did-finish-load', async (e) => {
+    webview.addEventListener('did-finish-load', () => {
       console.log('did-finish-load');
     });
     webview.addEventListener('did-fail-load', (event) => {
@@ -110,7 +112,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     webview.addEventListener('gpu-crashed', () => {
       console.error('webview GPU 崩溃');
     });
-    
+
     webview.addEventListener('ipc-message', (e) => {
       if (e.channel === 'webview-to-renderer') {
         const [ type, keyEvent ] = e.args;

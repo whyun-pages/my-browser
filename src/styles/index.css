@@ -1,0 +1,5 @@
+/* 样式入口。布局由 <html data-layout="classic|rail"> 决定，主题由 dark-theme 类决定。 */
+@import "./tokens.css";
+@import "./components.css";
+@import "./layout-classic.css";
+@import "./layout-rail.css";

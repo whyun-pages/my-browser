@@ -79,10 +79,10 @@ git push origin --tags
 
 ### 环境要求
 ```bash
-# Node.js 18+
+# Node.js 22.12+
 node --version
 
-# pnpm 包管理器
+# pnpm 包管理器（版本由 package.json 的 packageManager 字段固定）
 npm install -g pnpm
 
 # 安装依赖

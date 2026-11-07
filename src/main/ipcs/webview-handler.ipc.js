@@ -10,8 +10,9 @@ class WebviewHandlerIPC {
         this.rpcOptions = rpcOptions;
     }
     _addEvent() {
-        // 监听来自渲染进程的 webview 注册请求
-        ipcMain.on('register-webview-handler', (event, wcId) => {
+        // 监听来自渲染进程的 webview 注册请求。
+        // allowCrossOrigin 是这个标签页创建时的跨域设置，由渲染进程一并告知
+        ipcMain.on('register-webview-handler', (event, { wcId, allowCrossOrigin }) => {
             const wc = webContents.fromId(wcId);
             if (wc) {
                 logger.info('注册 webview 拦截新窗口:', wcId, wc);
@@ -22,6 +23,18 @@ class WebviewHandlerIPC {
                             'open-new-window', handlerDetails
                         );
                         return { action: 'deny' };
+                    }
+                    // 弹出的独立窗口不会继承标签页的跨域设置，这里让它和打开它的标签页保持一致
+                    if (allowCrossOrigin) {
+                        return {
+                            action: 'allow',
+                            overrideBrowserWindowOptions: {
+                                webPreferences: {
+                                    webSecurity: false,
+                                    allowRunningInsecureContent: true,
+                                },
+                            },
+                        };
                     }
                     return { action: 'allow' };
                 });

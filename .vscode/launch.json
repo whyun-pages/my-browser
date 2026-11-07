@@ -12,7 +12,7 @@
           "--inspect=5858",
           "--enable-logging",
           "--lang=zh-CN",
-          "${workspaceRoot}/src/main.js"
+          "${workspaceRoot}/src/main/main.js"
         ],
         "env": {
           "NODE_ENV": "development",
