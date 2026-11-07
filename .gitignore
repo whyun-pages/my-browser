@@ -3,3 +3,5 @@ dist
 .env
 bookmarks.json
 build/icon*
+/design
+/.superdesign

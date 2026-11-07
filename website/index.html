@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyBrowser — 两种布局的桌面浏览器，也能交给 AI 操作</title>
+<meta name="description" content="MyBrowser 是一个基于 Electron 的桌面浏览器：经典和侧栏两种布局随时切换，跨域开关方便调试接口，可选开启 MCP 接口让 Claude Code、Cursor 等 AI 工具读取和操作网页。">
+<link rel="icon" href="assets/favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#">
+    <img src="assets/icon.png" alt="" width="32" height="32">
+    <span>MyBrowser</span>
+  </a>
+  <nav aria-label="页面导航">
+    <a href="#browse">浏览</a>
+    <a href="#ai">AI 接口</a>
+    <a href="#download">下载</a>
+    <a href="https://github.com/whyun-pages/my-browser#使用说明">使用说明</a>
+    <a class="gh" href="https://github.com/whyun-pages/my-browser">GitHub</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>标签页放上面，<br>还是放左边，<br>你说了算。</h1>
+    <p class="lede">MyBrowser 是一个轻量的桌面浏览器。经典和侧栏两种布局一键切换，打开的页面不会重新加载；
+      给开发调试准备了跨域开关；还可以开启 AI 接口，让 Claude Code、Cursor 这类工具替你打开、读取和操作网页。</p>
+    <div class="actions">
+      <a class="btn primary" href="#download">下载 MyBrowser</a>
+      <a class="btn" href="https://github.com/whyun-pages/my-browser">查看源码</a>
+    </div>
+    <p class="meta">免费开源（MIT），支持 Windows、macOS 和 Linux。</p>
+  </div>
+
+  <figure class="stage" id="stage" data-layout="classic" data-theme="light">
+    <div class="switches" role="group" aria-label="切换截图">
+      <div class="seg" role="radiogroup" aria-label="布局">
+        <button type="button" role="radio" aria-checked="true" data-set="layout" data-value="classic">经典布局</button>
+        <button type="button" role="radio" aria-checked="false" data-set="layout" data-value="rail">侧栏布局</button>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="主题">
+        <button type="button" role="radio" aria-checked="true" data-set="theme" data-value="light">浅色</button>
+        <button type="button" role="radio" aria-checked="false" data-set="theme" data-value="dark">暗黑</button>
+      </div>
+    </div>
+    <div class="screen">
+      <img class="on" src="assets/classic-light.webp" width="1800" height="1008" alt="经典布局、浅色主题：标签栏在窗口顶部，下面是地址栏和网页" data-shot="classic-light">
+      <img src="assets/classic-dark.webp" width="1800" height="1008" alt="经典布局、暗黑主题" data-shot="classic-dark" loading="lazy">
+      <img src="assets/rail-light.webp" width="1800" height="1008" alt="侧栏布局、浅色主题：标签页和收藏夹竖排在左侧深紫色侧栏里" data-shot="rail-light" loading="lazy">
+      <img src="assets/rail-dark.webp" width="1800" height="1008" alt="侧栏布局、暗黑主题" data-shot="rail-dark" loading="lazy">
+    </div>
+    <figcaption id="stage-caption">经典布局：标签栏在上，强调色跟着当前网站变。</figcaption>
+  </figure>
+</section>
+
+<section class="browse" id="browse" aria-labelledby="browse-title">
+  <h2 id="browse-title">日常浏览，该有的都有</h2>
+  <div class="rows">
+    <article class="row">
+      <h3>切布局不刷新页面</h3>
+      <p>经典布局适合标签少、屏幕窄的时候；侧栏布局把标签页和收藏夹竖着排，标题再长也看得全，还能收起成一条只显示图标的窄栏。
+        切换时正在填的表单、播放的视频都还在原处。</p>
+    </article>
+    <article class="row">
+      <h3>跨域开关</h3>
+      <p>调接口时打开“允许跨域”，新开的标签页不受同源策略限制；平时关掉，和普通浏览器一样。
+        地址栏左端始终显示当前标签页的实际状态，不用猜。</p>
+    </article>
+    <article class="row">
+      <h3>书签和地址栏</h3>
+      <p>点星标收藏当前页面。地址栏输入网址、域名或本机地址直接打开，输入其他内容用必应搜索。
+        主题有浅色、暗黑和跟随系统三种。</p>
+    </article>
+    <article class="row keys">
+      <h3>常用快捷键</h3>
+      <dl>
+        <div><dt><kbd>Ctrl</kbd> <kbd>T</kbd></dt><dd>新建标签页</dd></div>
+        <div><dt><kbd>Ctrl</kbd> <kbd>W</kbd></dt><dd>关闭标签页</dd></div>
+        <div><dt><kbd>Ctrl</kbd> <kbd>L</kbd></dt><dd>聚焦地址栏</dd></div>
+        <div><dt><kbd>Ctrl</kbd> <kbd>D</kbd></dt><dd>收藏当前页面</dd></div>
+        <div><dt><kbd>Ctrl</kbd> <kbd>,</kbd></dt><dd>打开设置页</dd></div>
+        <div><dt><kbd>F12</kbd></dt><dd>开发者工具</dd></div>
+      </dl>
+      <p class="note">焦点在网页里时也有效。macOS 上用 <kbd>Cmd</kbd> 代替 <kbd>Ctrl</kbd>。</p>
+    </article>
+  </div>
+</section>
+
+<section class="ai" id="ai" aria-labelledby="ai-title">
+  <div class="ai-inner">
+    <div class="ai-text">
+      <h2 id="ai-title">让 AI 用你的浏览器干活</h2>
+      <p>在设置页打开“AI 接口（MCP）”，MyBrowser 会在本机启动一个 MCP 服务。Claude Code、Cursor、VS Code、Claude 桌面版等客户端连上之后，
+        就能在后台标签页里打开网页、读文字、截图、点按钮、填表单——不会把页面切到前台，也不会抢走你正在打字的输入框。</p>
+      <p class="warn"><strong>开启前请注意：</strong>连上的 AI 能看到并操作所有已打开的标签页，包括你已经登录的网站，也能在页面里执行脚本、提交表单。
+        服务只监听本机，每个请求都要带访问令牌；只连接你信任的客户端。</p>
+
+      <h3>三步连上</h3>
+      <ol class="steps">
+        <li>打开设置页（<kbd>Ctrl</kbd> <kbd>,</kbd>），进入“AI 接口（MCP）”，打开“允许 AI 客户端连接”。</li>
+        <li>点“连接配置”，选你用的客户端，复制现成的配置。地址和令牌已经填好。</li>
+        <li>把配置粘到客户端里。以 Claude Code 为例：</li>
+      </ol>
+      <pre class="code"><code>claude mcp add --transport http mybrowser http://127.0.0.1:17345/mcp \
+  --header "Authorization: Bearer &lt;你的令牌&gt;"</code></pre>
+    </div>
+    <figure class="ai-shot">
+      <img src="assets/settings-dialog.webp" width="1800" height="1008" alt="设置页里的连接配置弹窗：可以选择 Claude Code、Cursor、VS Code、Claude 桌面版或其他客户端，令牌默认打码" loading="lazy">
+      <figcaption>连接配置弹窗。令牌默认只露前四位。</figcaption>
+    </figure>
+  </div>
+
+  <div class="tools">
+    <h3>15 个工具</h3>
+    <div class="tool-groups">
+      <div>
+        <h4>标签页</h4>
+        <p><code>list_tabs</code> <code>open_tab</code> <code>close_tab</code> <code>activate_tab</code></p>
+      </div>
+      <div>
+        <h4>导航与等待</h4>
+        <p><code>navigate</code> <code>navigate_history</code> <code>wait_for</code></p>
+      </div>
+      <div>
+        <h4>读取</h4>
+        <p><code>get_html</code> <code>get_text</code> <code>query_dom</code> <code>screenshot</code></p>
+      </div>
+      <div>
+        <h4>操作</h4>
+        <p><code>click</code> <code>fill</code> <code>dispatch_event</code> <code>evaluate</code></p>
+      </div>
+    </div>
+    <p class="note">AI 打开的标签页标题旁有 AI 标记。<code>click</code> 发送真实鼠标点击；选择器不进 iframe 和 Shadow DOM，截图不支持整页长图。
+      完整说明见 <a href="https://github.com/whyun-pages/my-browser#ai-接口mcp">README</a>。</p>
+  </div>
+</section>
+
+<section class="download" id="download" aria-labelledby="download-title">
+  <h2 id="download-title">下载</h2>
+  <p>当前版本 2.0.1。安装包在 GitHub Releases 页面。</p>
+  <ul class="platforms">
+    <li>
+      <h3>Windows</h3>
+      <p>安装版（.exe）或便携版，x64</p>
+    </li>
+    <li>
+      <h3>macOS</h3>
+      <p>.dmg 或 .zip，Intel 与 Apple 芯片</p>
+    </li>
+    <li>
+      <h3>Linux</h3>
+      <p>AppImage、.deb、.rpm、.tar.gz，x64</p>
+    </li>
+  </ul>
+  <a class="btn primary" href="https://github.com/whyun-pages/my-browser/releases">前往 Releases 下载</a>
+  <p class="note">安装包没有正式签名，Windows 上杀毒软件可能会先观察几秒再放行；把安装目录加入例外即可。
+    想自己构建：<code>pnpm install</code> 后运行 <code>pnpm build</code>。</p>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p><img src="assets/icon.png" alt="" width="20" height="20"> MyBrowser 以 MIT 许可开源</p>
+  <p><a href="https://github.com/whyun-pages/my-browser">源码</a>
+    <a href="https://github.com/whyun-pages/my-browser/blob/main/docs/QUICK_START.md">快速上手</a>
+    <a href="https://github.com/whyun-pages/my-browser/blob/main/docs/KEYBOARD_SHORTCUTS.md">快捷键</a>
+    <a href="https://github.com/whyun-pages/my-browser/issues">问题反馈</a></p>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

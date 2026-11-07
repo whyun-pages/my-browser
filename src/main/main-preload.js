@@ -15,6 +15,15 @@ const validChannels = [
     'add-history',
     'delete-history',
     'register-webview-handler',
+    'mcp-get-status',
+    'mcp-set-enabled',
+    'mcp-get-connection',
+    'mcp-get-config-path',
+    'mcp-show-config',
+    'mcp-status-changed',
+    'mcp-renderer-ready',
+    'mcp-tab-request',
+    'mcp-tab-response',
 ];
 // 暴露安全的 API 给渲染进程
 window.electronAPI = {
@@ -26,11 +35,15 @@ window.electronAPI = {
             console.warn(`Invalid channel: ${channel}`);
         }
     },
+    // 返回取消监听的函数
     on: (channel, func) => {
         if (validChannels.includes(channel)) {
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
+            const listener = (event, ...args) => func(...args);
+            ipcRenderer.on(channel, listener);
+            return () => ipcRenderer.removeListener(channel, listener);
         } else {
             console.warn(`Invalid channel: ${channel}`);
+            return () => {};
         }
     },
     invoke: async (channel, ...args) => {

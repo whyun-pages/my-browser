@@ -138,6 +138,19 @@ svg {
     opacity: 1;
     background: var(--hover);
 }
+/* AI 打开的标签页：标题后面一个小标记 */
+.tab-ai-badge {
+    flex: none;
+    padding: 0 4px;
+    border-radius: 4px;
+    border: 1px solid currentColor;
+    font: 600 9px/13px ui-monospace, "Cascadia Mono", Consolas, monospace;
+    letter-spacing: .04em;
+    opacity: .75;
+}
+[data-layout="rail"][data-rail="slim"] .tab-ai-badge {
+    display: none;
+}
 .new-tab-btn {
     color: var(--muted);
 }
@@ -467,14 +480,23 @@ svg {
     min-height: 0;
     background: #fff;
 }
+/* 网页视图叠放在内容区里。后台标签页 display: none，不占资源；
+   AI 接口操作后台标签页时临时加上 mcp-rendering，放到当前标签页下面渲染，用户看不到 */
 webview {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: none;
     display: none;
 }
+webview.mcp-rendering {
+    display: flex;
+    z-index: 0;
+}
 webview.active {
     display: flex;
+    z-index: 1;
 }
 .load-progress {
     display: none;

@@ -12,7 +12,11 @@ class WebviewHandlerIPC {
     _addEvent() {
         // 监听来自渲染进程的 webview 注册请求。
         // allowCrossOrigin 是这个标签页创建时的跨域设置，由渲染进程一并告知
-        ipcMain.on('register-webview-handler', (event, { wcId, allowCrossOrigin }) => {
+        ipcMain.on('register-webview-handler', (event, { wcId, tabId, allowCrossOrigin }) => {
+            // 登记给 AI 接口使用；内部会校验发送者是主窗口、网页视图属于主窗口
+            if (this.rpcOptions.tabBridge && Number.isInteger(tabId)) {
+                this.rpcOptions.tabBridge.register(event.sender, { wcId, tabId });
+            }
             const wc = webContents.fromId(wcId);
             if (wc) {
                 logger.info('注册 webview 拦截新窗口:', wcId, wc);

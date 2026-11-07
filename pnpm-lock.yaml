@@ -191,9 +191,15 @@ importers:
 
   .:
     dependencies:
+      '@modelcontextprotocol/server':
+        specifier: 2.4.0
+        version: 2.4.0
       node-slogger:
         specifier: ^3.0.0
         version: 3.0.0
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       electron:
         specifier: ^45.2.2
@@ -575,6 +581,14 @@ packages:
   '@malept/flatpak-bundler@0.4.0':
     resolution: {integrity: sha512-9QOtNffcOF/c1seMCDnjckb3R9WHcG34tky+FHpNKKCW0wc/scYLwMtO+ptyGUfMW0/b/n4qRiALlaFHc9Oj7Q==}
     engines: {node: '>= 10.0.0'}
+
+  '@modelcontextprotocol/core@2.4.0':
+    resolution: {integrity: sha512-z8QBKqdfXLPzkLQuG4xp8hrVEMm1PZ1IgxMN2sMbJiFiAKOWXnAzogXn2W4aqIBlP1ea6U5yiqVquvUNM1Cj6Q==}
+    engines: {node: '>=20'}
+
+  '@modelcontextprotocol/server@2.4.0':
+    resolution: {integrity: sha512-rgR9yxSaAJ+bcsi/XroT/S2AfPiIWloXAnrdfYSCms9ivVju0ishu/wW0J21Ho6+ZOR1r7RyeRbjiRuF87ix5Q==}
+    engines: {node: '>=20'}
 
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
@@ -1839,6 +1853,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
 snapshots:
 
   '@electron-internal/extract-zip@1.0.8': {}
@@ -2120,6 +2137,15 @@ snapshots:
       tmp-promise: 3.0.3
     transitivePeerDependencies:
       - supports-color
+
+  '@modelcontextprotocol/core@2.4.0':
+    dependencies:
+      zod: 4.6.7
+
+  '@modelcontextprotocol/server@2.4.0':
+    dependencies:
+      '@modelcontextprotocol/core': 2.4.0
+      zod: 4.6.7
 
   '@noble/hashes@1.8.0': {}
 
@@ -3451,3 +3477,5 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
+
+  zod@4.6.7: {}

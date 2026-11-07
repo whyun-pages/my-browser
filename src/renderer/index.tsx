@@ -6,6 +6,7 @@ import { WebviewHelper } from "./helpers/webview.helper";
 import { globalModel } from "./models/global.model";
 import { settings } from "./models/settings.model";
 import { BookmarkHelper } from "./helpers/bookmark.helper";
+import { McpHelper } from "./helpers/mcp.helper";
 
 // 先把布局和主题写到 <html> 上，再渲染界面，避免启动时闪一下默认样式
 settings.apply();
@@ -22,4 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     app?.append(<div class="load-progress"></div>);
     globalModel.webviewHelper = new WebviewHelper();
     globalModel.bookmarkHelper = new BookmarkHelper();
+    // AI 接口（MCP）的标签页请求由这里应答
+    new McpHelper(globalModel.webviewHelper);
 });

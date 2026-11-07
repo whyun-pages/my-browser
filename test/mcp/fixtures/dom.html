@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DomFixture</title>
+<style>
+  body { margin: 0; font: 16px sans-serif; }
+  #list li { height: 20px; }
+  .hidden { display: none; }
+  #invisible { visibility: hidden; }
+  #covered-wrap { position: relative; width: 200px; height: 40px; }
+  #covered { width: 200px; height: 40px; }
+  #overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .2); }
+  #box { width: 120px; height: 60px; background: rgb(255, 0, 0); }
+  #spacer { height: 3000px; }
+</style>
+</head>
+<body>
+<h1 id="title">Dom fixture</h1>
+<p id="visible-text">Visible paragraph</p>
+<p class="hidden">Secret hidden text</p>
+<p id="invisible">Invisible text</p>
+<ul id="list">
+  <li class="item" data-n="0">Item zero</li>
+  <li class="item" data-n="1">Item one</li>
+  <li class="item" data-n="2">Item two</li>
+</ul>
+<button id="btn" type="button">Click me</button>
+<button id="disabled" type="button" disabled>Disabled</button>
+<div id="covered-wrap"><button id="covered" type="button">Covered</button><div id="overlay"></div></div>
+<div id="box"></div>
+<a id="hash-link" href="#section">To section</a>
+<a id="nav-link" href="/?LinkTarget">Go to LinkTarget</a>
+<div id="events"></div>
+<div id="spacer"></div>
+<button id="far" type="button">Far away</button>
+<script>
+  window.log = [];
+  const record = (name) => (e) => window.log.push({ name, trusted: e.isTrusted, type: e.type, detail: e.detail ?? null });
+  document.getElementById('btn').addEventListener('click', record('btn'));
+  document.getElementById('covered').addEventListener('click', record('covered'));
+  document.getElementById('far').addEventListener('click', record('far'));
+  const ev = document.getElementById('events');
+  ev.addEventListener('my-event', (e) => { window.log.push({ name: 'my-event', detail: e.detail, trusted: e.isTrusted }); e.preventDefault(); });
+  ev.addEventListener('keydown', (e) => window.log.push({ name: 'keydown', key: e.key, trusted: e.isTrusted }));
+  // 带 ?delay 时 500ms 后才出现 #late
+  if (location.search.includes('delay')) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.id = 'late';
+      el.textContent = 'Late arrival';
+      document.body.prepend(el);
+    }, 500);
+  }
+</script>
+</body>
+</html>

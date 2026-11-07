@@ -1,4 +1,5 @@
 import { WebviewComponent } from '../components/content-area/webview';
+import { parseSettingsUrl, SettingsPage, type SettingsSection } from '../components/settings/settings-page';
 import { TabComponent } from '../components/tabs-container/tab';
 import { globalModel } from '../models/global.model';
 import { settings } from '../models/settings.model';
@@ -16,6 +17,24 @@ export interface Tab {
     /** 网页提供的图标地址 */
     favicon?: string;
     loading?: boolean;
+    /** 由 AI 接口打开 */
+    aiOpened?: boolean;
+    /** 最近一次主框架加载失败的信息；开始新的加载时清除 */
+    loadError?: { code: number; description: string; url: string };
+    /**
+     * 内置页面：由外壳直接绘制，没有网页视图。不出现在 AI 接口的标签页列表里，
+     * 前进后退、刷新、收藏、开发者工具对它都不起作用
+     */
+    kind?: 'settings';
+}
+/** 设置页的强调色：取 logo 里的蓝色，不跟随网站 */
+const SETTINGS_HUE = '#2FA4DC';
+export interface CreateTabOptions {
+    referer?: string;
+    /** 在后台打开，不切换当前标签页 */
+    background?: boolean;
+    /** 由 AI 接口打开，标签上显示 AI 标记 */
+    aiOpened?: boolean;
 }
 export class WebviewHelper {
     tabs: Map<number, Tab> = new Map();
@@ -30,6 +49,11 @@ export class WebviewHelper {
     private corsChip = document.getElementById('cors-chip') as HTMLElement;
     private corsChipText = document.getElementById('cors-chip-text') as HTMLElement;
     private app = document.getElementById('app') as HTMLElement;
+    /** 设置页最多只有一个，再次打开时切过去 */
+    private settingsPage: SettingsPage | undefined;
+    private get settingsTab(): Tab | undefined {
+        return [...this.tabs.values()].find((tab) => tab.kind === 'settings');
+    }
     private get tabElements() {
         return document.querySelectorAll('.tab');
     }
@@ -62,7 +86,7 @@ export class WebviewHelper {
             handlerDetails: Electron.HandlerDetails,
         ) => {
             this.createNewTab(
-                handlerDetails.url, handlerDetails.referrer?.url
+                handlerDetails.url, { referer: handlerDetails.referrer?.url }
             );
         });
         document.addEventListener('keydown', (e) => {
@@ -113,6 +137,8 @@ export class WebviewHelper {
                     return () => this.addBookmark();
                 case 'l': // 聚焦地址栏
                     return () => this.focusAddressBar();
+                case ',': // 打开设置页
+                    return () => this.openSettings();
             }
         }
         // 后退/前进：macOS 为 Cmd+[ / Cmd+]，其他平台为 Alt+← / Alt+→
@@ -134,7 +160,9 @@ export class WebviewHelper {
         return undefined;
     }
 
-    createNewTab(url: string = this.homeUrl, referer?: string) {
+    /** 新建标签页，返回界面内的标签页编号 */
+    createNewTab(url: string = this.homeUrl, options: CreateTabOptions = {}): number {
+        const { referer, background = false, aiOpened = false } = options;
         const tabId = this.tabCounter++;
         const tab: Tab = {
             id: tabId,
@@ -145,6 +173,7 @@ export class WebviewHelper {
             referer: referer,
             // “允许跨域”只在创建标签页时读取一次：改开关不影响已打开的标签页
             crossOrigin: settings.allowCrossOrigin,
+            aiOpened,
         }
         this.tabs.set(tabId, tab);
         const webviewComponent = new WebviewComponent({
@@ -155,9 +184,34 @@ export class WebviewHelper {
         });
         const webviewElement = webviewComponent.render();
         this.webviewContainer.appendChild(webviewElement);
-        this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} />);
+        this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} aiOpened={aiOpened} />);
         this.paintTabFavicon(tabId);
-        this.switchToTab(tabId);
+        if (!background || this.activeTabId === undefined) {
+            this.switchToTab(tabId);
+        }
+        return tabId;
+    }
+    /** 打开设置页；已经打开时切过去。传入分区时跳到该分区 */
+    openSettings(section?: SettingsSection): number {
+        let tab = this.settingsTab;
+        if (!tab || !this.settingsPage) {
+            const tabId = this.tabCounter++;
+            tab = {
+                id: tabId,
+                url: 'mybrowser://settings',
+                title: '设置',
+                crossOrigin: false,
+                kind: 'settings',
+            };
+            this.tabs.set(tabId, tab);
+            const page = new SettingsPage((url) => this.updateTab(tabId, { url }));
+            this.settingsPage = page;
+            this.webviewContainer.appendChild(page.element);
+            this.tabsContainer.appendChild(<TabComponent id={tabId} title={tab.title} settings={true} />);
+        }
+        this.switchToTab(tab.id);
+        this.settingsPage.show(section);
+        return tab.id;
     }
     updateTab(tabId: number, tabProps: Partial<Tab>) {
         const tab = this.tabs.get(tabId);
@@ -210,17 +264,15 @@ export class WebviewHelper {
     }
 
     switchToTab(tabId: number) {
-        // 移除所有活动状态
-        this.tabElements.forEach(tab => tab.classList.remove('active'));
-        this.webviewElements.forEach(webview => webview.classList.remove('active'));
-        
-        // 添加活动状态
         const tabElement = this.tabElement(tabId);
-        const webview = this.webviewElement(tabId);
-        
-        if (tabElement && webview) {
+        // 网页标签页显示网页视图，设置页显示外壳绘制的页面
+        const pane = this.tabs.get(tabId)?.kind === 'settings' ? this.settingsPage?.element : this.webviewElement(tabId);
+        if (tabElement && pane) {
+            this.tabElements.forEach(tab => tab.classList.remove('active'));
+            this.webviewElements.forEach(webview => webview.classList.remove('active'));
+            this.settingsPage?.element.classList.remove('active');
             tabElement.classList.add('active');
-            webview.classList.add('active');
+            pane.classList.add('active');
             
             this.activeTabId = tabId;
             
@@ -249,8 +301,19 @@ export class WebviewHelper {
         const tab = this.tabs.get(this.activeTabId as number);
         this.setBookmarked(!!tab && !!globalModel.bookmarkHelper?.isBookmarked(tab.url));
     }
-    // 地址栏里的标记：显示当前标签页创建时是否放行了跨域
+    private get activeIsSettings() {
+        return this.tabs.get(this.activeTabId as number)?.kind === 'settings';
+    }
+    // 地址栏里的标记：显示当前标签页创建时是否放行了跨域；内置页面显示“MyBrowser”
     private updateCorsChip() {
+        const internal = this.activeIsSettings;
+        this.corsChip.classList.toggle('internal', internal);
+        if (internal) {
+            this.corsChip.classList.remove('off');
+            this.corsChipText.textContent = 'MyBrowser';
+            this.corsChip.title = 'MyBrowser 内置页面';
+            return;
+        }
         const allowed = !!this.tabs.get(this.activeTabId as number)?.crossOrigin;
         this.corsChip.classList.toggle('off', !allowed);
         this.corsChipText.textContent = allowed ? '跨域已放行' : '未放行跨域';
@@ -261,7 +324,7 @@ export class WebviewHelper {
     // 收藏按当前标签页记录的地址和标题，和星标的显示状态用同一个来源
     toggleBookmark() {
         const tab = this.tabs.get(this.activeTabId as number);
-        if (!tab) {
+        if (!tab || tab.kind) {
             return;
         }
         if (globalModel.bookmarkHelper?.isBookmarked(tab.url)) {
@@ -275,11 +338,14 @@ export class WebviewHelper {
         }
     }
     updateAddressBar(url: string) {
+        const internal = this.activeIsSettings;
         this.addressBar.value = url;
-        this.setBookmarked(!!globalModel.bookmarkHelper?.isBookmarked(url));
+        this.setBookmarked(!internal && !!globalModel.bookmarkHelper?.isBookmarked(url));
+        // 内置页面不能收藏
+        this.bookmarkButton.classList.toggle('hidden', internal);
         this.updateCorsChip();
         // 界面的强调色跟着当前站点走
-        document.documentElement.style.setProperty('--hue', siteColor(url));
+        document.documentElement.style.setProperty('--hue', internal ? SETTINGS_HUE : siteColor(url));
     }
 
     updateNavigationButtons() {
@@ -323,7 +389,24 @@ export class WebviewHelper {
     navigate(input: string) {
         if (!input.trim()) return;
 
+        // mybrowser://settings/<分区> 打开设置页，分区无效时停在当前分区
+        const section = parseSettingsUrl(input);
+        if (section !== undefined) {
+            const settingsId = this.openSettings(section || undefined);
+            // 在网页标签页里输入的：地址栏恢复成该网页的地址，等切回去时仍是对的
+            if (settingsId !== this.activeTabId) {
+                this.updateAddressBar(this.tabs.get(this.activeTabId as number)?.url || '');
+            }
+            return;
+        }
         const url = this.resolveInput(input.trim());
+        // 在设置页里输入网址：和 Chrome 一样用网页取代设置页
+        if (this.activeIsSettings) {
+            const settingsId = this.activeTabId as number;
+            this.createNewTab(url);
+            this.closeTab(settingsId);
+            return;
+        }
         const activeWebview = this.activeWebviewElement;
         if (activeWebview) {
             activeWebview.src = url;
@@ -362,8 +445,8 @@ export class WebviewHelper {
 
     addBookmark() {
         const tab = this.tabs.get(this.activeTabId as number);
-        // 已收藏的页面不重复添加
-        if (tab && !globalModel.bookmarkHelper?.isBookmarked(tab.url)) {
+        // 已收藏的页面不重复添加，内置页面不收藏
+        if (tab && !tab.kind && !globalModel.bookmarkHelper?.isBookmarked(tab.url)) {
             globalModel.bookmarkHelper?.add({
                 url: tab.url,
                 title: tab.title,
@@ -409,19 +492,25 @@ export class WebviewHelper {
     }
 
     // 不传 tabId 时关闭当前活动标签页（注意第一个标签页的 id 是 0）
-    closeTab(tabId: number | undefined = this.activeTabId) {
+    closeTab(tabId: number | undefined = this.activeTabId): 'closed' | 'not_found' | 'last_tab' {
         if (tabId === undefined || !this.tabs.has(tabId)) {
-            return;
+            return 'not_found';
         }
         if (this.tabs.size <= 1) {
-            return; // 至少保留一个标签页
+            return 'last_tab'; // 至少保留一个标签页
         }
         const tabIds = [...this.tabs.keys()];
         const index = tabIds.indexOf(tabId);
 
         // 移除DOM元素和标签页数据
         this.tabElement(tabId)?.remove();
-        this.webviewElement(tabId)?.remove();
+        if (this.tabs.get(tabId)?.kind === 'settings') {
+            this.settingsPage?.destroy();
+            this.settingsPage?.element.remove();
+            this.settingsPage = undefined;
+        } else {
+            this.webviewElement(tabId)?.remove();
+        }
         this.tabs.delete(tabId);
 
         // 如果关闭的是当前活动标签页，优先切换到左侧标签页，最左侧被关闭时切换到右侧
@@ -431,5 +520,19 @@ export class WebviewHelper {
                 this.switchToTab(nextTabId);
             }
         }
+        return 'closed';
+    }
+
+    /**
+     * AI 接口的按需渲染：让后台标签页临时保持渲染（放在当前标签页下方，用户看不到）。
+     * 返回 false 表示标签页不存在。
+     */
+    setTabRendering(tabId: number, on: boolean): boolean {
+        const webview = this.webviewElement(tabId);
+        if (!webview) {
+            return false;
+        }
+        webview.classList.toggle('mcp-rendering', on);
+        return true;
     }
 }
