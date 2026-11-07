@@ -44,6 +44,15 @@ export interface FaviconOptions {
 /** 把站点图标画到一个 .fav 元素里：加载中是转圈，其次是真实图标，最后是带首字的彩色圆点 */
 export function paintFavicon(el: HTMLElement, options: FaviconOptions) {
     const index = hueIndex(options.url);
+    // 用展开取首字，emoji、生僻字等由两个码元组成的字符不会被切成半个
+    const letter = [...options.title.trim()][0] || '?';
+    const favicon = options.loading ? '' : (options.favicon || '');
+    // 要画的内容和上次一样就不动：标题、地址频繁变化时不必反复重建图片
+    const key = `${index}|${options.loading ? 1 : 0}|${favicon}|${letter}`;
+    if (el.dataset.favKey === key) {
+        return;
+    }
+    el.dataset.favKey = key;
     el.style.setProperty('--hue', HUES[index]);
     el.style.setProperty('--fg', index === DARK_TEXT_INDEX ? '#1D2433' : '#fff');
     el.classList.toggle('spin', !!options.loading);
@@ -54,16 +63,21 @@ export function paintFavicon(el: HTMLElement, options: FaviconOptions) {
     }
     const paintDot = () => {
         el.classList.remove('has-img');
-        el.textContent = options.title.trim().charAt(0) || '?';
+        el.textContent = letter;
     };
-    if (!options.favicon) {
+    if (!favicon) {
         paintDot();
         return;
     }
     const img = document.createElement('img');
     img.alt = '';
-    img.addEventListener('error', paintDot);
-    img.src = options.favicon;
+    img.addEventListener('error', () => {
+        // 图片加载失败时元素可能已经重绘过，过期的失败不能覆盖新内容
+        if (img.parentNode === el) {
+            paintDot();
+        }
+    });
+    img.src = favicon;
     el.classList.add('has-img');
     el.append(img);
 }

@@ -84,6 +84,10 @@ export class WebviewHelper {
     // 把按键映射为浏览器操作，每个按键最多命中一个操作（macOS 下修饰键为 Cmd）。
     // 需与 renderer/preload.js 中的 isAppShortcut 保持一致
     private shortcutAction(e: KeyboardEvent): (() => void) | undefined {
+        // 合成的键盘事件可能没有 key
+        if (!e.key) {
+            return undefined;
+        }
         const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
         const mod = (this.isMac ? e.metaKey : e.ctrlKey) && !e.altKey;
 
@@ -254,22 +258,20 @@ export class WebviewHelper {
             ? '同源策略已关闭：这个页面可以读取其他源的响应'
             : '这个标签页遵守同源策略。在设置里打开“允许跨域”后，新开的标签页才会放行';
     }
+    // 收藏按当前标签页记录的地址和标题，和星标的显示状态用同一个来源
     toggleBookmark() {
-        const activeWebview = this.activeWebviewElement;
-        if (activeWebview) {
-            if (globalModel.bookmarkHelper?.isBookmarked(activeWebview.src)) {
-                globalModel.bookmarkHelper?.remove(
-                    globalModel.bookmarkHelper?.getBookmarkId(activeWebview.src) as number,
-                    activeWebview.src,
-                );
-                this.setBookmarked(false);
-            } else {
-                globalModel.bookmarkHelper?.add({
-                    url: activeWebview.src,
-                    title: activeWebview.getTitle()
-                });
-                this.setBookmarked(true);
-            }
+        const tab = this.tabs.get(this.activeTabId as number);
+        if (!tab) {
+            return;
+        }
+        if (globalModel.bookmarkHelper?.isBookmarked(tab.url)) {
+            globalModel.bookmarkHelper?.remove(
+                globalModel.bookmarkHelper?.getBookmarkId(tab.url) as number,
+                tab.url,
+            );
+            this.setBookmarked(false);
+        } else {
+            this.addBookmark();
         }
     }
     updateAddressBar(url: string) {
@@ -358,16 +360,13 @@ export class WebviewHelper {
         this.navigate(this.homeUrl);
     }
 
-    goto() {
-        this.navigate(this.addressBar.value);
-    }
     addBookmark() {
-        const activeWebview = this.activeWebviewElement;
+        const tab = this.tabs.get(this.activeTabId as number);
         // 已收藏的页面不重复添加
-        if (activeWebview && !globalModel.bookmarkHelper?.isBookmarked(activeWebview.src)) {
+        if (tab && !globalModel.bookmarkHelper?.isBookmarked(tab.url)) {
             globalModel.bookmarkHelper?.add({
-                url: activeWebview.src,
-                title: activeWebview.getTitle()
+                url: tab.url,
+                title: tab.title,
             });
             this.setBookmarked(true);
         }

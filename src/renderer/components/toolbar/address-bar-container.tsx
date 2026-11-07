@@ -15,7 +15,8 @@ export class AddressBarContainer extends AbstractComponent {
                 <input type="text" id="address-bar" spellcheck="false" autocomplete="off"
                     placeholder="输入网址或搜索内容" aria-label="地址栏" onkeydown={
                     (e: KeyboardEvent) => {
-                        if (e.key === 'Enter') {
+                        // 输入法组合过程中的回车是在选字，不是要前往
+                        if (e.key === 'Enter' && !e.isComposing) {
                             const input = e.target as HTMLInputElement;
                             globalModel.webviewHelper?.navigate(input.value);
                             input.blur();
