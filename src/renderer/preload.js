@@ -30,7 +30,7 @@ function isAppShortcut(e) {
     if (mod && key === 'r') {
         return true;
     }
-    if (mod && !e.shiftKey && ['t', 'w', 'd', 'l'].includes(key)) {
+    if (mod && !e.shiftKey && ['t', 'w', 'd', 'l', ','].includes(key)) {
         return true;
     }
     if (isMac) {

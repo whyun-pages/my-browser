@@ -16,6 +16,8 @@
     --c-line: #D5DAE3;
     --c-hover: rgba(29, 36, 51, .07);
     --c-focus: var(--hue, #2FA4DC);
+    /* 铺在强调色上的文字（主按钮） */
+    --c-on-focus: #fff;
     --c-chip: color-mix(in srgb, var(--hue, #2FA4DC) 17%, transparent);
     --c-star: #DFA200;
     --c-shadow: rgba(15, 20, 30, .16);
@@ -49,6 +51,7 @@
     --c-line: #DEDBEB;
     --c-hover: rgba(30, 27, 51, .07);
     --c-focus: #6C5FD0;
+    --c-on-focus: #fff;
     --c-mark: #F7CF2F;
     --c-chip: color-mix(in srgb, var(--c-mark) 38%, transparent);
     --c-star: #D99A00;
@@ -77,6 +80,7 @@
     --c-line: #37325A;
     --c-hover: rgba(255, 255, 255, .08);
     --c-focus: #F7CF2F;
+    --c-on-focus: #1E1B33;
     --c-chip: color-mix(in srgb, var(--c-mark) 22%, transparent);
     --c-star: #F7CF2F;
     --c-shadow: rgba(0, 0, 0, .55);

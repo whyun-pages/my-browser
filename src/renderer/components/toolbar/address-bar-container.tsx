@@ -1,15 +1,16 @@
 import { AbstractComponent } from "@/jsx-runtime";
 import { globalModel } from "../../models/global.model";
-import { IconLock, IconStar, IconSwap } from "../icons";
+import { IconGear, IconLock, IconStar, IconSwap } from "../icons";
 
 export class AddressBarContainer extends AbstractComponent {
     render() {
         return (
             <div class="address-bar-container">
-                {/* 普通浏览器放小锁的位置：显示当前标签页是否放行跨域，文字和样式由 WebviewHelper 更新 */}
+                {/* 普通浏览器放小锁的位置：显示当前标签页是否放行跨域；设置页显示“MyBrowser”。文字和样式由 WebviewHelper 更新 */}
                 <span id="cors-chip" class="cors-chip">
                     <IconSwap class="cors-on-icon" />
                     <IconLock class="cors-off-icon" />
+                    <IconGear class="cors-internal-icon" />
                     <span id="cors-chip-text"></span>
                 </span>
                 <input type="text" id="address-bar" spellcheck="false" autocomplete="off"

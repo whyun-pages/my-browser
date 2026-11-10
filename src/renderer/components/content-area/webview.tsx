@@ -40,9 +40,13 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       webview.setAttribute("webpreferences", "allowRunningInsecureContent");
     }
 
-    // 事件：Electron 的 webview 用 'did-attach'
+    // 挂载完成就登记给主进程：有些地址（例如被浏览器禁止的端口）永远不会触发 dom-ready，
+    // 只在 dom-ready 时登记会让 AI 接口无法寻址这个标签页。重复登记是幂等的
     webview.addEventListener("did-attach", () => {
       console.log("webview 已附加");
+      if (window.electronAPI) {
+        window.electronAPI.send('register-webview-handler', { wcId: webview.getWebContentsId(), tabId, allowCrossOrigin });
+      }
     });
 
     // webview 事件监听
@@ -52,7 +56,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       const wcId = webview.getWebContentsId();
       // 使用预加载脚本暴露的安全 API
       if (window.electronAPI) {
-        window.electronAPI.send('register-webview-handler', { wcId, allowCrossOrigin });
+        window.electronAPI.send('register-webview-handler', { wcId, tabId, allowCrossOrigin });
       }
     });
 
@@ -89,6 +93,7 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
     });
 
     webview.addEventListener('did-start-loading', () => {
+      globalModel.webviewHelper?.updateTab(this.props.tabId, { loadError: undefined });
       globalModel.webviewHelper?.setTabLoading(this.props.tabId, true);
     });
 
@@ -100,6 +105,12 @@ export class WebviewComponent extends AbstractComponent<WebviewProps> {
       console.log('did-finish-load');
     });
     webview.addEventListener('did-fail-load', (event) => {
+      // 子框架加载失败不影响页面本身；-3（ERR_ABORTED）是被新的跳转打断，不算失败
+      if (event.isMainFrame && event.errorCode !== -3) {
+        globalModel.webviewHelper?.updateTab(this.props.tabId, {
+          loadError: { code: event.errorCode, description: event.errorDescription, url: event.validatedURL },
+        });
+      }
       console.error('did-fail-load', event.errorCode, event.errorDescription, event.validatedURL);
       // 可以在这里添加重试逻辑或显示错误信息
     });

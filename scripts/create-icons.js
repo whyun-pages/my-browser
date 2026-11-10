@@ -43,6 +43,11 @@ if (!fs.existsSync(inputFile)) {
 
 const buildDir = path.join(__dirname, '../build');
 
+// 图案占画布的比例。源图四周的透明边会先裁掉，再按这个比例留边：
+// Windows / Linux 的图标基本铺满画布；macOS 按官方模板留一圈边（1024 里约 824）。
+const FILL = 0.9;
+const FILL_MAC = 0.8;
+
 // 确保build目录存在
 if (!fs.existsSync(buildDir)) {
   fs.mkdirSync(buildDir, { recursive: true });
@@ -52,9 +57,27 @@ async function generateIcons() {
   try {
     console.log('🎨 开始生成图标...');
     
-    // 读取原始图片
-    const image = sharp(inputFile);
-    const metadata = await image.metadata();
+    // 读取原始图片，裁掉四周的透明边
+    const metadata = await sharp(inputFile).metadata();
+    const trimmed = await sharp(inputFile).ensureAlpha().trim({ threshold: 1 }).png().toBuffer();
+    const trimmedMeta = await sharp(trimmed).metadata();
+    console.log(`✂️  裁掉透明边后: ${trimmedMeta.width}x${trimmedMeta.height}`);
+    /** 把图案缩到 size*fill 并居中放进 size × size 的透明画布 */
+    const render = async (size, fill) => {
+      const inner = Math.max(1, Math.round(size * fill));
+      const art = await sharp(trimmed)
+        .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .toBuffer();
+      const pad = size - inner;
+      return sharp(art)
+        .extend({
+          top: Math.floor(pad / 2), bottom: Math.ceil(pad / 2),
+          left: Math.floor(pad / 2), right: Math.ceil(pad / 2),
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
+    };
     
     console.log(`📏 原始图片尺寸: ${metadata.width}x${metadata.height}`);
     
@@ -65,10 +88,7 @@ async function generateIcons() {
 
     // 生成 Linux PNG (512x512)
     console.log('🐧 生成 Linux 图标...');
-    await image
-      .resize(512, 512)
-      .png()
-      .toFile(path.join(buildDir, 'icon.png'));
+    await fsPromise.writeFile(path.join(buildDir, 'icon.png'), await render(512, FILL));
     console.log('   ℹ️  已生成 PNG 格式');
 
 
@@ -76,14 +96,9 @@ async function generateIcons() {
     console.log('🍎 生成 macOS 图标素材...');
     const sizes = [16, 32, 64, 128, 256, 512, 1024];
     
-    const buffers = await Promise.all(sizes.map(size => {
-      return image
-        .resize(size, size)
-        .png()
-        .toBuffer();
-    }));
+    const macBuffers = await Promise.all(sizes.map((size) => render(size, FILL_MAC)));
 
-    await gen(buffers.map((buffer, index) => ({
+    await gen(macBuffers.map((buffer, index) => ({
       buffer,
       size: sizes[index],
     })), path.join(buildDir, 'icon.icns'));
@@ -92,7 +107,9 @@ async function generateIcons() {
     // 生成 Windows ICO (256x256)
     console.log('🪟 生成 Windows 图标...');
 
-    const bufferIco = await png2ico(buffers.slice(0,-2));
+    // 16 – 256；小尺寸也铺满，任务栏里才不显得小
+    const icoBuffers = await Promise.all(sizes.slice(0, -2).map((size) => render(size, FILL)));
+    const bufferIco = await png2ico(icoBuffers);
     await fsPromise.writeFile(
       path.join(buildDir, 'icon.ico'), bufferIco
     );
